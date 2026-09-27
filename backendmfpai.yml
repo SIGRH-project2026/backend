@@ -1,0 +1,22 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: backend-mfpai
+  namespace: mfpai
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: backend-mfpai
+      version: v01
+  template:
+    metadata:
+      labels:
+        app: backend-mfpai
+        version: v01
+    spec:
+      containers:
+        - name: backend-mfpai-container
+          image: infras/mfpai:0.1.${buildnumber}-backend-mfpai
+          ports:
+            - containerPort: 9083

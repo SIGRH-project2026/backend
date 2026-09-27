@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 9.0.0.final using JasperReports Library version 6.21.0-4f56c4f36cd19e17675219a9ac4692d5f0f13b06  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="CopieA4" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="b85b7bc9-8f5b-484a-9c81-0bc74a58001e">
+    <property name="com.jaspersoft.studio.report.description" value="Le Ministre,"/>
+    <queryString>
+        <![CDATA[]]>
+    </queryString>
+    <field name="referenceActe" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.name" value="referenceActe"/>
+        <property name="com.jaspersoft.studio.field.label" value="referenceActe"/>
+        <property name="com.jaspersoft.studio.field.tree.path" value="Acte"/>
+    </field>
+    <field name="typeActe" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.name" value="typeActe"/>
+        <property name="com.jaspersoft.studio.field.label" value="typeActe"/>
+        <property name="com.jaspersoft.studio.field.tree.path" value="Acte"/>
+    </field>
+    <field name="matricule" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.name" value="matricule"/>
+        <property name="com.jaspersoft.studio.field.label" value="matricule"/>
+        <property name="com.jaspersoft.studio.field.tree.path" value="Acte"/>
+    </field>
+    <field name="nom" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.name" value="nom"/>
+        <property name="com.jaspersoft.studio.field.label" value="nom"/>
+        <property name="com.jaspersoft.studio.field.tree.path" value="Acte"/>
+    </field>
+    <field name="prenom" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.name" value="prenom"/>
+        <property name="com.jaspersoft.studio.field.label" value="prenom"/>
+        <property name="com.jaspersoft.studio.field.tree.path" value="Acte"/>
+    </field>
+    <field name="direction" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.name" value="referenceActe"/>
+        <property name="com.jaspersoft.studio.field.label" value="referenceActe"/>
+        <property name="com.jaspersoft.studio.field.tree.path" value="Acte"/>
+    </field>
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+    <title>
+        <band height="110" splitType="Stretch">
+            <staticText>
+                <reportElement x="287" y="1" width="267" height="20" uuid="3bee9630-6a19-48e6-9bd4-144f4aae35f4"/>
+                <textElement textAlignment="Right"/>
+                <text><![CDATA[N°..................................MEFPT/SG/DRH/Div.GCAA/BAA]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="0" y="0" width="150" height="20" uuid="15648c41-f908-4226-8ecf-4113d56f30cf"/>
+                <textElement textAlignment="Left"/>
+                <text><![CDATA[REPUBLIQUE DU SENEGAL]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="1" y="18" width="149" height="20" uuid="1a620330-11fc-48e1-b24d-36be3fb7d37b"/>
+                <textElement textAlignment="Center">
+                    <font fontName="Serif"/>
+                </textElement>
+                <text><![CDATA[Un Peuple- Un But- Une foi]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="1" y="40" width="190" height="36" uuid="c5d1ef59-6bd7-4700-9670-f60e9970fa27"/>
+                <textElement textAlignment="Left"/>
+                <text><![CDATA[Ministère de l'Emploi et de la Formation Professionnelle et technique]]></text>
+            </staticText>
+            <textField pattern="EEEEE dd MMMMM yyyy">
+                <reportElement x="382" y="43" width="172" height="20" forecolor="#0A0909" uuid="63286779-4eb0-410e-952e-4b0cb48619c5"/>
+                <textElement textAlignment="Left">
+                    <font size="12"/>
+                </textElement>
+                <textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="300" y="42" width="81" height="20" uuid="e1df01f2-2aeb-4332-9e27-439f4fc2bdd9"/>
+                <textElement textAlignment="Justified">
+                    <font size="11"/>
+                </textElement>
+                <text><![CDATA[Dakar, le]]></text>
+            </staticText>
+        </band>
+    </title>
+    <pageHeader>
+        <band height="35" splitType="Stretch"/>
+    </pageHeader>
+    <columnHeader>
+        <band height="258" splitType="Stretch">
+            <staticText>
+                <reportElement x="440" y="-66" width="110" height="31" uuid="76b666ed-62f1-4318-9da5-85f0caba1201"/>
+                <textElement textAlignment="Right">
+                    <font size="18"/>
+                </textElement>
+                <text><![CDATA[Le Ministre,]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="1" y="-68" width="190" height="31" uuid="efba125c-8ad5-4960-bd7b-73986c80912c"/>
+                <textElement textAlignment="Left"/>
+                <text><![CDATA[Direction des Ressources humaines *************AD************]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="170" y="-33" width="191" height="31" uuid="942b4743-637b-4342-b1b7-4802b621386a"/>
+                <textElement textAlignment="Center">
+                    <font size="16" isUnderline="true" isStrikeThrough="false"/>
+                </textElement>
+                <text><![CDATA[BORDREAU D'ENVOI]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+    <detail>
+        <band height="160" splitType="Stretch">
+            <staticText>
+                <reportElement x="2" y="-259" width="534" height="60" uuid="8b6cf1ea-b248-4ef9-b6da-e365b293acd9"/>
+                <textElement>
+                    <font size="13" isUnderline="false" isStrikeThrough="false"/>
+                </textElement>
+                <text><![CDATA[Pièces adressées à Monsieur le Ministre de la Fonction publique, de la Rationalisation des Effectifs et du Renouveau du Service public.]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="2" y="-179" width="150" height="20" uuid="49588fa0-22d6-4ce3-a688-771a2f738ba4"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="13" isUnderline="false" isStrikeThrough="false"/>
+                </textElement>
+                <text><![CDATA[Type d'acte]]></text>
+            </staticText>
+            <textField textAdjust="StretchHeight">
+                <reportElement positionType="Float" x="305" y="-177" width="150" height="18" uuid="cec4d1bf-2c73-4948-b73d-6091c51c28d7">
+                    <property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6b6f3e3e-b73d-4302-a01b-366a367f8768"/>
+                </reportElement>
+                <textElement>
+                    <font size="14"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{typeActe}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="2" y="-147" width="150" height="20" uuid="4457e238-b081-4218-8c7e-cb2a09814e39"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="13" isUnderline="false" isStrikeThrough="false"/>
+                </textElement>
+                <text><![CDATA[Date d'emission borderau]]></text>
+            </staticText>
+            <textField pattern="EEEEE dd MMMMM yyyy">
+                <reportElement x="304" y="-145" width="193" height="20" forecolor="#0A0909" uuid="b7acfcbc-31de-46a4-9a40-2dfc8ec51781"/>
+                <textElement textAlignment="Left">
+                    <font size="12"/>
+                </textElement>
+                <textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="2" y="-84" width="150" height="20" uuid="d4d3cacc-f754-4234-a88d-4fa6b24f41cb"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="13" isUnderline="false" isStrikeThrough="false"/>
+                </textElement>
+                <text><![CDATA[Matricule :]]></text>
+            </staticText>
+            <textField textAdjust="StretchHeight">
+                <reportElement positionType="Float" x="305" y="-81" width="150" height="18" uuid="79413db0-170f-4211-9176-2181856e1fd3">
+                    <property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6b6f3e3e-b73d-4302-a01b-366a367f8768"/>
+                </reportElement>
+                <textElement>
+                    <font size="14"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{matricule}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="2" y="-118" width="150" height="20" uuid="732fa5d5-4e1e-4f0f-b514-a957bdd6586d"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="13" isUnderline="false" isStrikeThrough="false"/>
+                </textElement>
+                <text><![CDATA[Prénom:]]></text>
+            </staticText>
+            <textField textAdjust="StretchHeight">
+                <reportElement positionType="Float" x="305" y="-115" width="150" height="18" uuid="c3740688-dc33-4ae0-afef-ee2899ed0e80">
+                    <property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6b6f3e3e-b73d-4302-a01b-366a367f8768"/>
+                </reportElement>
+                <textElement>
+                    <font size="14"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{prenom}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="2" y="-52" width="150" height="20" uuid="c00c5cc7-b2e9-4232-b5f0-20c3d1201561"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="13" isUnderline="false" isStrikeThrough="false"/>
+                </textElement>
+                <text><![CDATA[Nom:]]></text>
+            </staticText>
+            <textField textAdjust="StretchHeight">
+                <reportElement positionType="Float" x="304" y="-49" width="150" height="18" uuid="1ff9e010-a065-44ca-908b-bd8b05c39bf7">
+                    <property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6b6f3e3e-b73d-4302-a01b-366a367f8768"/>
+                </reportElement>
+                <textElement>
+                    <font size="14"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{nom}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="2" y="-20" width="150" height="20" uuid="9a331043-4eda-42db-ab93-44c00738a3a1"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="13" isUnderline="false" isStrikeThrough="false"/>
+                </textElement>
+                <text><![CDATA[Direction/service:]]></text>
+            </staticText>
+            <textField textAdjust="StretchHeight">
+                <reportElement positionType="Float" x="304" y="-19" width="150" height="18" uuid="0ac4d37d-72b3-4884-857e-23782759909a">
+                    <property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6b6f3e3e-b73d-4302-a01b-366a367f8768"/>
+                </reportElement>
+                <textElement>
+                    <font size="14"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{direction}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+</jasperReport>

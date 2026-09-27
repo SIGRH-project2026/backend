@@ -1,0 +1,33 @@
+// ADMIN-DRH
+{
+    "login": "admindrh@yopmail.com",
+    password: "+F8krk"
+}
+
+
+// Admin-General
+{
+    "login": "admingeneral@yopmail.com",
+    password: "P7r*at"
+}
+
+
+// Agent-bureau
+{
+    "login": "agentbureau@mailinator.com",
+    password: "P7r*at"
+}
+
+
+// Chef-division
+{
+    "login": "chefdivision@yopmail.com",
+    password: "Fs9_qx"
+}
+
+
+// manager
+{
+    "login": "manage_a@yopmail.com",
+    password: "!Xak2w"
+}

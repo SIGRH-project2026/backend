@@ -1,0 +1,673 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.21.2.final using JasperReports Library version 6.21.2-8434a0bd7c3bbc37cbf916f2968d35e4b165821a  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="BulletinDeVisite" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9e2499cf-29f5-4c09-a211-18b1513ef473">
+    <queryString>
+        <![CDATA[]]>
+    </queryString>
+    <field name="numeroDemande" class="java.lang.Long">
+        <property name="com.jaspersoft.studio.field.name" value="numeroDemande"/>
+        <property name="com.jaspersoft.studio.field.label" value="numeroDemande"/>
+        <property name="com.jaspersoft.studio.field.tree.path" value="Imputation"/>
+    </field>
+    <field name="corps" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.name" value="corps"/>
+        <property name="com.jaspersoft.studio.field.label" value="corps"/>
+        <property name="com.jaspersoft.studio.field.tree.path" value="Imputation"/>
+    </field>
+    <field name="grade" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.name" value="grade"/>
+        <property name="com.jaspersoft.studio.field.label" value="grade"/>
+        <property name="com.jaspersoft.studio.field.tree.path" value="Imputation"/>
+    </field>
+    <field name="matricule" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.name" value="matricule"/>
+        <property name="com.jaspersoft.studio.field.label" value="matricule"/>
+        <property name="com.jaspersoft.studio.field.tree.path" value="Imputation"/>
+    </field>
+    <field name="nomBeneficiere" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.name" value="nomBeneficiere"/>
+        <property name="com.jaspersoft.studio.field.label" value="nomBeneficiere"/>
+        <property name="com.jaspersoft.studio.field.tree.path" value="Imputation"/>
+    </field>
+    <field name="prenomBeneficiere" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.name" value="prenomBeneficiere"/>
+        <property name="com.jaspersoft.studio.field.label" value="prenomBeneficiere"/>
+        <property name="com.jaspersoft.studio.field.tree.path" value="Imputation"/>
+    </field>
+    <field name="prenomAgent" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.name" value="prenomAgent"/>
+        <property name="com.jaspersoft.studio.field.label" value="prenomAgent"/>
+        <property name="com.jaspersoft.studio.field.tree.path" value="Imputation"/>
+    </field>
+    <field name="nomAgent" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.name" value="nomAgent"/>
+        <property name="com.jaspersoft.studio.field.label" value="nomAgent"/>
+        <property name="com.jaspersoft.studio.field.tree.path" value="Imputation"/>
+    </field>
+    <field name="adresse" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.name" value="adresse"/>
+        <property name="com.jaspersoft.studio.field.label" value="adresse"/>
+        <property name="com.jaspersoft.studio.field.tree.path" value="Imputation"/>
+    </field>
+    <field name="direction" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.name" value="direction"/>
+        <property name="com.jaspersoft.studio.field.label" value="direction"/>
+        <property name="com.jaspersoft.studio.field.tree.path" value="Imputation"/>
+    </field>
+    <field name="iaIef" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.name" value="iaIef"/>
+        <property name="com.jaspersoft.studio.field.label" value="iaIef"/>
+        <property name="com.jaspersoft.studio.field.tree.path" value="Imputation"/>
+    </field>
+    <field name="dateImputation" class="java.time.LocalDate">
+        <property name="com.jaspersoft.studio.field.name" value="dateImputation"/>
+        <property name="com.jaspersoft.studio.field.label" value="dateImputation"/>
+        <property name="com.jaspersoft.studio.field.tree.path" value="Imputation"/>
+    </field>
+    <field name="statusBeneficiere" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.name" value="statusBeneficiere"/>
+        <property name="com.jaspersoft.studio.field.label" value="statusBeneficiere"/>
+        <property name="com.jaspersoft.studio.field.tree.path" value="Imputation"/>
+    </field>
+    <field name="qualite" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.name" value="qualite"/>
+        <property name="com.jaspersoft.studio.field.label" value="qualite"/>
+        <property name="com.jaspersoft.studio.field.tree.path" value="Imputation"/>
+    </field>
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+    <!-- <title>
+        <band height="134" splitType="Stretch">
+            <line>
+                <reportElement x="232" y="55" width="95" height="1" uuid="f5c72996-87c8-4310-b4ce-41166f82c2a9"/>
+            </line>
+            <staticText>
+                <reportElement x="185" y="16" width="250" height="19" uuid="03bb1211-1e39-48d9-aa95-e9f35b38a16d"/>
+                <textElement>
+                    <font size="14" isBold="true"/>
+                </textElement>
+                <text><![CDATA[REPUBLIQUE DU SENEGAL]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="214" y="36" width="150" height="20" uuid="f40d29de-7fad-4322-b6ce-b50546e63e6a"/>
+                <textElement>
+                    <font isItalic="true"/>
+                </textElement>
+                <text><![CDATA[Un Peuple - un But - une Foi]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="16" y="63" width="526" height="36" uuid="16b27e67-1e01-401b-a4b5-86500329fcdb"/>
+                <textElement textAlignment="Center">
+                    <font size="13" isBold="true" isItalic="false"/>
+                </textElement>
+                <text><![CDATA[MINISTERE DE L'EMPLOI ET DE LA FORMATION PROFESSIONNELLE ET TECHNIQUE]]></text>
+            </staticText>
+            <line>
+                <reportElement x="236" y="101" width="95" height="1" uuid="3c923574-7cd5-472a-97f6-3d3c711c50b9"/>
+            </line>
+            <staticText>
+                <reportElement x="132" y="108" width="350" height="20" uuid="a0e3bcb4-d8e4-4c67-a911-4b4484f3fbd2"/>
+                <textElement>
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[DIRECTION DES RESSOURCES HUMAINES]]></text>
+            </staticText>
+        </band>
+    </title> -->
+    <title>
+        <band height="134" splitType="Stretch">
+            <line>
+                <reportElement x="232" y="55" width="95" height="1" uuid="f5c72996-87c8-4310-b4ce-41166f82c2a9"/>
+            </line>
+            <staticText>
+                <reportElement x="185" y="16" width="250" height="19" uuid="03bb1211-1e39-48d9-aa95-e9f35b38a16d"/>
+                <textElement>
+                    <font size="14" isBold="true"/>
+                </textElement>
+                <text><![CDATA[REPUBLIQUE DU SENEGAL]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="214" y="36" width="150" height="20" uuid="f40d29de-7fad-4322-b6ce-b50546e63e6a"/>
+                <textElement>
+                    <font isItalic="true"/>
+                </textElement>
+                <text><![CDATA[Un Peuple - un But - une Foi]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="16" y="63" width="526" height="36" uuid="16b27e67-1e01-401b-a4b5-86500329fcdb"/>
+                <textElement textAlignment="Center">
+                    <font size="13" isBold="true" isItalic="false"/>
+                </textElement>
+                <text><![CDATA[MINISTERE DE L'EMPLOI ET DE LA FORMATION PROFESSIONNELLE ET TECHNIQUE]]></text>
+            </staticText>
+            <line>
+                <reportElement x="236" y="101" width="95" height="1" uuid="3c923574-7cd5-472a-97f6-3d3c711c50b9"/>
+            </line>
+            <staticText>
+                <reportElement x="132" y="108" width="350" height="20" uuid="a0e3bcb4-d8e4-4c67-a911-4b4484f3fbd2"/>
+                <textElement>
+                    <font size="14" isBold="true"/>
+                </textElement>
+                <text><![CDATA[DIRECTION DES RESSOURCES HUMAINES]]></text>
+            </staticText>
+        </band>
+    </title>
+    <pageHeader>
+        <band height="38" splitType="Stretch">
+            <staticText>
+                <reportElement x="174" y="20" width="20" height="18" uuid="68e31915-8288-47b6-8d11-d882b33a5e66"/>
+                <textElement>
+                    <font size="14"/>
+                </textElement>
+                <text><![CDATA[N°]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="198" y="20" width="84" height="18" uuid="91ed4b01-3d82-4c7c-8d2e-79348e195ff3"/>
+                <textElement>
+                    <font size="14" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{numeroDemande}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="287" y="20" width="174" height="18" uuid="6455b5f1-e67c-4102-a971-5a681a557320"/>
+                <textElement>
+                    <font size="14"/>
+                </textElement>
+                <text><![CDATA[MEFPT/SG/DRH/DAS]]></text>
+            </staticText>
+        </band>
+    </pageHeader>
+
+    <columnHeader>
+            <band height="110">
+
+                <!-- CADRE GRIS UNIQUEMENT POUR LE TITRE -->
+                <rectangle>
+                    <reportElement x="0" y="0" width="555" height="60"
+                                backcolor="#E8F0F7" forecolor="#225486" mode="Opaque"/>
+                </rectangle>
+
+                <staticText>
+                    <reportElement x="0" y="18" width="555" height="25"/>
+                    <textElement textAlignment="Center">
+                        <font size="16" isBold="true"/>
+                    </textElement>
+                    <text><![CDATA[BULLETIN DE VISITE MÉDICALE]]></text>
+                </staticText>
+
+                <!-- DATE EN DEHORS DU CADRE -->
+                <textField>
+                <reportElement x="350" y="75" width="114" height="20" uuid="235e8348-101a-4ad0-9935-f71873f1d1aa"/>
+                <textElement>
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{dateImputation}.format(java.time.format.DateTimeFormatter.ofPattern("dd MMMM yyyy", java.util.Locale.FRENCH))]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="250" y="75" width="70" height="20" uuid="569a5f05-91ab-4f1c-b5a5-53d79bd42935"/>
+                <textElement >
+                    <font size="12"/>
+                </textElement>
+                <text><![CDATA[Dakar, le]]></text>
+            </staticText>
+            </band>
+        </columnHeader>
+
+    <!-- <detail>
+            <band height="375">
+
+         
+            <rectangle>
+                <reportElement x="1" y="10" width="535" height="300"/>
+            </rectangle>
+
+         <staticText>
+                <reportElement x="40" y="10" width="220" height="20" uuid="5bc59e78-e98e-49ef-b582-f215e7b77686"/>
+                <textElement>
+                    <font size="14" isBold="true"/>
+                </textElement>
+                <text><![CDATA[PARTIE ADMINISTRATIVE]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="338" y="10" width="172" height="20" uuid="cced50b2-48e4-47ae-89c1-c0c248a94506"/>
+                <textElement>
+                    <font size="14" isBold="true"/>
+                </textElement>
+                <text><![CDATA[PARTIE MÉDICALE]]></text>
+            </staticText>
+            <line>
+                <reportElement x="282" y="17" width="1" height="289" uuid="c7253479-df15-4106-be34-32a007bafa0e"/>
+            </line>
+            <line>
+                <reportElement x="40" y="27" width="180" height="1" uuid="780092bb-b8a4-463d-8a5a-774ec730af2e"/>
+            </line>
+            <line>
+                <reportElement x="338" y="28" width="134" height="1" uuid="37f271c7-1b5a-4b26-b3e4-5f0a1a6137f8"/>
+            </line>
+            <textField>
+                <reportElement x="80" y="92" width="190" height="20" uuid="dee28759-c857-4e89-8316-05ebd56c2703"/>
+                <textElement>
+                    <font size="13" isBold="true" isItalic="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{prenomBeneficiere}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="160" y="147" width="110" height="20" uuid="22b1a2f6-e65e-4707-a5cd-63daa3739491"/>
+                <textElement>
+                    <font size="13" isBold="true" isItalic="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{prenomAgent}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="3" y="119" width="48" height="20" uuid="cfce987f-08f1-4c3e-9ce6-28f426760683"/>
+                <textElement>
+                    <font size="13" isBold="true"/>
+                </textElement>
+                <text><![CDATA[NOM :]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="64" y="119" width="206" height="20" uuid="5a3b8a62-f939-4e3c-85d7-eb010fa21a6d"/>
+                <textElement>
+                    <font size="13" isBold="true" isItalic="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{nomBeneficiere}]]></textFieldExpression>
+            </textField>
+                    <textField>
+                        <reportElement x="3" y="148" width="158" height="20" uuid="0cee7532-8ed1-4e71-a018-77e6f3df7e6e"/>
+                        <textElement>
+                            <font size="13" isBold="true"/>
+                        </textElement>
+                        <textFieldExpression><![CDATA[
+                            "Époux".equals($F{statusBeneficiere}) ? "Époux de :" :
+                            "Épouse".equals($F{statusBeneficiere}) ? "Épouse de :" :
+                            "Enfant".equals($F{statusBeneficiere}) ? "Enfant de :" : "Epoux(se) / Enfant de :"
+                        ]]></textFieldExpression>
+                    </textField>
+            <staticText>
+                <reportElement x="3" y="92" width="74" height="20" uuid="4c5fdee2-5e14-44fd-81f5-9ceceabf89d2"/>
+                <textElement>
+                    <font size="13" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Prénoms :]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="52" y="175" width="218" height="20" uuid="77153e6c-b047-4926-a478-d94a334f75f4"/>
+                <textElement>
+                    <font size="13" isBold="true" isItalic="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{nomAgent}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="3" y="60" width="100" height="20" uuid="ffe0bd2d-3aae-4101-a40c-1aabed19283e"/>
+                <textElement>
+                    <font size="13" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{direction} != null && !$F{direction}.isEmpty() ? "Direction :" : "IA/IEF :" ]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="105" y="60" width="180" height="40" uuid="113db78e-403f-4d85-8d7a-b5d219a72efe"/>
+                <textElement>
+                    <font size="12"  isItalic="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{direction} != null && !$F{direction}.isEmpty() ?  $F{direction} :  $F{iaIef} ]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="3" y="202" width="48" height="20" uuid="05c0fc1b-eda3-4962-9285-80024b179181"/>
+                <textElement>
+                    <font size="13" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Corps :]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="56" y="202" width="212" height="20" uuid="31599955-9cb3-41fc-b8d2-e2452f8c4e18"/>
+                <textElement>
+                    <font size="13" isBold="true" isItalic="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{corps}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="3" y="228" width="48" height="20" uuid="8c8bc11e-ea37-49aa-911a-19eadc4286a9"/>
+                <textElement>
+                    <font size="13" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Grade :]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="55" y="228" width="214" height="20" uuid="5cb0b568-0be1-410b-b1f8-1d0495f4c143"/>
+                <textElement>
+                    <font size="13" isBold="true" isItalic="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{grade}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="3" y="254" width="146" height="20" uuid="978adcb7-9466-4d3f-a851-8131c9a2a56b"/>
+                <textElement>
+                    <font size="13" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Matricule de solde :]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="129" y="254" width="160" height="20" uuid="88ca5ff8-081a-42ae-a638-07f41a7e8427"/>
+                <textElement>
+                    <font size="13" isBold="true" isItalic="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{matricule}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="2" y="281" width="146" height="20" uuid="3065d84c-747c-4fcc-985b-4ccda10c0226"/>
+                <textElement>
+                    <font size="13" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Adresse précise :]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="119" y="281" width="150" height="20" uuid="4257f939-32e9-4de7-a0b9-01f8f28bbea7"/>
+                <textElement>
+                    <font size="13" isBold="true" isItalic="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{adresse}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="66" y="350" width="170" height="20" uuid="bed151c9-7fb8-4259-ab26-131fa856d88f"/>
+                <textElement>
+                    <font size="14" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Le chef de service]]></text>
+            </staticText>
+            <line>
+                <reportElement x="66" y="368" width="121" height="1" uuid="ef75560c-9cee-4b9b-846b-94fb228a9b9f"/>
+            </line>
+            <staticText>
+                <reportElement x="370" y="351" width="170" height="20" uuid="2ec8a3b1-9d0d-48cf-a091-92d51776a8fc"/>
+                <textElement>
+                    <font size="14" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Le Médecin  traitant]]></text>
+            </staticText>
+            <line>
+                <reportElement x="367" y="370" width="139" height="1" uuid="160bc7a9-0b26-4767-b8ca-39f8df3a5d2c"/>
+            </line>
+            <staticText>
+                <reportElement x="291" y="60" width="280" height="20" uuid="fc622330-d278-4c3e-93a3-9f353d5663b2"/>
+                <textElement>
+                    <font size="13"/>
+                </textElement>
+                <text><![CDATA[Nécessité de soins, tous les jours à ......]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="291" y="88" width="280" height="20" uuid="9e89f063-cbf4-44d9-87dc-bf303c0e2905"/>
+                <textElement>
+                    <font size="13"/>
+                </textElement>
+                <text><![CDATA[Nécessité de repos médical de ...... jour(s)]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="291" y="120" width="260" height="20" uuid="395f6550-a43d-4f8c-ba74-88f13f8fd813"/>
+                <textElement>
+                    <font size="13"/>
+                </textElement>
+                <text><![CDATA[Reprend service le ..............................]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="291" y="147" width="260" height="20" uuid="d500003c-999a-43b9-ae20-5c3d5ee0d892"/>
+                <textElement>
+                    <font size="13"/>
+                </textElement>
+                <text><![CDATA[A revoir, le ..........................................]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="291" y="177" width="260" height="124" uuid="c9ff0601-3608-425e-b9cf-80cda0b19a9d"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="13"/>
+                </textElement>
+                <text><![CDATA[Observations générales .............................. ..................................................................... ..................................................................... ..................................................................... ..................................................................... ..................................................................... .....................................................................]]></text>
+            </staticText>
+        </band>
+    </detail> -->
+    <detail>
+  <band height="330">
+
+    <!-- CADRE PRINCIPAL -->
+    <rectangle>
+        <reportElement x="10" y="10" width="535" height="280"/>
+    </rectangle>
+
+    <!-- SEPARATION -->
+    <line>
+        <reportElement x="277" y="17" width="1" height="270"/>
+    </line>
+
+    <!-- TITRES -->
+    <staticText>
+        <reportElement x="40" y="18" width="220" height="20"/>
+        <textElement>
+            <font size="14" isBold="true"/>
+        </textElement>
+        <text><![CDATA[PARTIE ADMINISTRATIVE]]></text>
+    </staticText>
+    
+    <staticText>
+        <reportElement x="338" y="18" width="172" height="20"/>
+        <textElement>
+            <font size="14" isBold="true"/>
+        </textElement>
+        <text><![CDATA[PARTIE MÉDICALE]]></text>
+    </staticText>
+    
+    <line>
+        <reportElement x="40" y="35" width="170" height="1"/>
+    </line>
+    
+    <line>
+        <reportElement x="338" y="35" width="128" height="1"/>
+    </line>
+
+    <!-- PARTIE ADMINISTRATIVE -->
+    <!-- Direction -->
+    <staticText>
+        <reportElement x="20" y="60" width="70" height="20"/>
+        <textElement>
+            <font size="12" isBold="true"/>
+        </textElement>
+        <text><![CDATA[Direction :]]></text>
+    </staticText>
+
+    <textField>
+        <reportElement x="100" y="60" width="160" height="20"/>
+        <textElement>
+            <font size="12" isBold="false"/>
+        </textElement>
+        <textFieldExpression><![CDATA[$F{direction} != null && !$F{direction}.isEmpty() ? $F{direction} : $F{iaIef}]]></textFieldExpression>
+    </textField>
+
+    <!-- Prénoms -->
+    <staticText>
+        <reportElement x="20" y="90" width="70" height="20"/>
+        <textElement>
+            <font size="12" isBold="true"/>
+        </textElement>
+        <text><![CDATA[Prénoms :]]></text>
+    </staticText>
+
+    <textField>
+        <reportElement x="100" y="90" width="160" height="20"/>
+        <textElement>
+            <font size="12" isBold="false"/>
+        </textElement>
+        <textFieldExpression><![CDATA[$F{prenomBeneficiere}]]></textFieldExpression>
+    </textField>
+
+    <!-- Nom -->
+    <staticText>
+        <reportElement x="20" y="120" width="70" height="20"/>
+        <textElement>
+            <font size="12" isBold="true"/>
+        </textElement>
+        <text><![CDATA[Nom :]]></text>
+    </staticText>
+
+    <textField>
+        <reportElement x="100" y="120" width="160" height="20"/>
+        <textElement>
+            <font size="12" isBold="false"/>
+        </textElement>
+        <textFieldExpression><![CDATA[$F{nomBeneficiere}]]></textFieldExpression>
+    </textField>
+
+    <!-- Epoux(se) / Enfant de -->
+    <textField>
+        <reportElement x="20" y="150" width="140" height="20"/>
+        <textElement>
+            <font size="12" isBold="true"/>
+        </textElement>
+        <textFieldExpression><![CDATA[
+            "Époux".equals($F{statusBeneficiere}) ? "Époux de :" :
+            "Épouse".equals($F{statusBeneficiere}) ? "Épouse de :" :
+            "Enfant".equals($F{statusBeneficiere}) ? "Enfant de :" : "Epoux(se) / Enfant de :"
+        ]]></textFieldExpression>
+    </textField>
+
+    <textField>
+        <reportElement x="160" y="150" width="100" height="20"/>
+        <textElement>
+            <font size="12" isBold="false"/>
+        </textElement>
+        <textFieldExpression><![CDATA[$F{prenomAgent}]]></textFieldExpression>
+    </textField>
+
+    <textField>
+        <reportElement x="100" y="180" width="160" height="20"/>
+        <textElement>
+            <font size="12" isBold="false"/>
+        </textElement>
+        <textFieldExpression><![CDATA[$F{nomAgent}]]></textFieldExpression>
+    </textField>
+
+    <!-- Corps -->
+    <staticText>
+        <reportElement x="20" y="210" width="70" height="20"/>
+        <textElement>
+            <font size="12" isBold="true"/>
+        </textElement>
+        <text><![CDATA[Corps :]]></text>
+    </staticText>
+
+    <textField>
+        <reportElement x="100" y="210" width="160" height="20"/>
+        <textElement>
+            <font size="12" isBold="false"/>
+        </textElement>
+        <textFieldExpression><![CDATA[$F{corps}]]></textFieldExpression>
+    </textField>
+
+    <!-- Grade -->
+    <staticText>
+        <reportElement x="20" y="240" width="70" height="20"/>
+        <textElement>
+            <font size="12" isBold="true"/>
+        </textElement>
+        <text><![CDATA[Grade :]]></text>
+    </staticText>
+
+    <textField>
+        <reportElement x="100" y="240" width="160" height="20"/>
+        <textElement>
+            <font size="12" isBold="false"/>
+        </textElement>
+        <textFieldExpression><![CDATA[$F{grade}]]></textFieldExpression>
+    </textField>
+
+    <!-- Matricule -->
+    <staticText>
+        <reportElement x="20" y="270" width="110" height="20"/>
+        <textElement>
+            <font size="12" isBold="true"/>
+        </textElement>
+        <text><![CDATA[Matricule :]]></text>
+    </staticText>
+
+    <textField>
+        <reportElement x="100" y="270" width="110" height="20"/>
+        <textElement>
+            <font size="12" isBold="false"/>
+        </textElement>
+        <textFieldExpression><![CDATA[$F{matricule}]]></textFieldExpression>
+    </textField>
+
+    <!-- PARTIE MEDICALE -->
+     <!-- MEDICAL -->
+    <staticText>
+        <reportElement x="300" y="60" width="300" height="20"/>
+        <textElement><font size="12"/></textElement>
+        <text><![CDATA[Nécessité de soins, tous les jours à : .............]]></text>
+    </staticText>
+
+    <staticText>
+        <reportElement x="300" y="85" width="240" height="20"/>
+        <textElement><font size="12"/></textElement>
+        <text><![CDATA[Nécessité de repos médical de : .......... jour(s)]]></text>
+    </staticText>
+
+    <staticText>
+        <reportElement x="300" y="110" width="240" height="20"/>
+        <textElement><font size="12"/></textElement>
+        <text><![CDATA[Reprend service le : ....................]]></text>
+    </staticText>
+
+    <staticText>
+        <reportElement x="300" y="135" width="240" height="20"/>
+        <textElement><font size="12"/></textElement>
+        <text><![CDATA[A revoir, le : ....................]]></text>
+    </staticText>
+
+    <staticText>
+        <reportElement x="300" y="160" width="240" height="80"/>
+        <textElement><font size="12"/></textElement>
+        <text><![CDATA[Observations générales :
+            ............................................................
+            ............................................................
+            ............................................................
+            ............................................................]]></text>
+                </staticText>
+
+
+    <!-- SIGNATURES -->
+    <staticText>
+        <reportElement x="90" y="310" width="200" height="20"/>
+        <textElement textAlignment="Center">
+            <font size="12" isBold="true"/>
+        </textElement>
+        <text><![CDATA[Le Chef de service]]></text>
+    </staticText>
+
+    <staticText>
+        <reportElement x="350" y="310" width="200" height="20"/>
+        <textElement textAlignment="Center">
+            <font size="12" isBold="true"/>
+        </textElement>
+        <text><![CDATA[Le Médecin traitant]]></text>
+    </staticText>
+
+  </band>
+</detail>
+
+
+    <columnFooter>
+        <band height="5" splitType="Stretch"/>
+    </columnFooter>
+    <pageFooter>
+        <band height="123" splitType="Stretch">
+            <staticText>
+                <reportElement x="1" y="50" width="552" height="50" forecolor="#52677A" uuid="949e9dd6-c6aa-4ab3-8e72-41fee2ae02db"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9"/>
+                </textElement>
+                <text><![CDATA[MINISTÈRE DE L'EMPLOI ET DE LA FORMATION PROFESSIONNELLE ET TECHNIQUE]]></text>
+            </staticText>
+        </band>
+    </pageFooter>
+    <summary>
+        <band height="42" splitType="Stretch"/>
+    </summary>
+</jasperReport>

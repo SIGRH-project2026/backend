@@ -1,0 +1,59 @@
+package sn.gainde2000.backenmfpai.security.jwt;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+import sn.gainde2000.backenmfpai.commons.utils.AuthUtils;
+import sn.gainde2000.backenmfpai.security.services.UtilisateurDetailsSerciveImpl;
+
+
+import java.io.IOException;
+
+/**
+ * @author G2k R&D
+ */
+
+@Component
+@RequiredArgsConstructor
+public class JwtAuthTokenFilter extends OncePerRequestFilter {
+    private static final Logger LOGGER = LogManager.getLogger(JwtAuthTokenFilter.class);
+    private final JwtProvider tokenProvider;
+    private final UtilisateurDetailsSerciveImpl utilisateurDetailsSercive;
+
+    @Override
+    protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain filterChain) throws ServletException, IOException {
+        try {
+            String jwt = AuthUtils.getJwt(request);
+
+            if (jwt != null && tokenProvider.validationJwtToken(jwt)) {
+
+                String userName = tokenProvider.getUserNameFromJwtToken(jwt);
+                UserDetails userDetails = utilisateurDetailsSercive.loadUserByUsername(userName);
+
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities()
+                );
+
+                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            }
+
+        } catch (Exception e) {
+            LOGGER.log(Level.valueOf("context"), e);
+        }
+
+        filterChain.doFilter(request, response);
+    }
+}

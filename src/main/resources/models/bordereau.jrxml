@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 9.0.0.final using JasperReports Library version 6.21.0-4f56c4f36cd19e17675219a9ac4692d5f0f13b06  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Bordereau" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="81a3aa8e-293d-4005-9773-ec5c42be7c3e">
+    <queryString>
+        <![CDATA[]]>
+    </queryString>
+
+    <field name="referenceActe" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.name" value="referenceActe"/>
+        <property name="com.jaspersoft.studio.field.label" value="referenceActe"/>
+        <property name="com.jaspersoft.studio.field.tree.path" value="Acte"/>
+    </field>
+
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+    <title>
+        <band height="75" splitType="Stretch">
+            <staticText>
+                <reportElement x="238" y="29" width="100" height="30" uuid="b3d8eb93-e391-4303-a58a-8cadb4670a44"/>
+                <text><![CDATA[MFPAI]]></text>
+            </staticText>
+        </band>
+    </title>
+    <pageHeader>
+        <band height="36" splitType="Stretch">
+            <textField>
+                <reportElement x="230" y="5" width="141" height="31" uuid="2588ad5b-7fe4-41e6-8af7-c335b7721e47"/>
+                <textFieldExpression><![CDATA[$F{referenceActe}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageHeader>
+    <columnHeader>
+        <band height="61" splitType="Stretch"/>
+    </columnHeader>
+    <detail>
+        <band height="125" splitType="Stretch"/>
+    </detail>
+    <columnFooter>
+        <band height="45" splitType="Stretch"/>
+    </columnFooter>
+    <pageFooter>
+        <band height="54" splitType="Stretch"/>
+    </pageFooter>
+    <summary>
+        <band height="42" splitType="Stretch"/>
+    </summary>
+</jasperReport>

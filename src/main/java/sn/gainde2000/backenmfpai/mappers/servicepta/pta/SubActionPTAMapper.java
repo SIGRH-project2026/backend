@@ -1,0 +1,38 @@
+package sn.gainde2000.backenmfpai.mappers.servicepta.pta;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.Named;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import sn.gainde2000.backenmfpai.entities.servicepta.pta.SubActionPTA;
+import sn.gainde2000.backenmfpai.mappers.EntityMapper;
+import sn.gainde2000.backenmfpai.web.dtos.requests.servicepta.pta.SubActionPTAReqDTO;
+import sn.gainde2000.backenmfpai.web.dtos.responses.servicepta.pta.SubActionPTAResDTO;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * @author Abdou Karim CISSOKHO
+ * @created 01/05/2024-16:02
+ * @project backend_mfpai
+ */
+
+
+@Mapper
+public interface SubActionPTAMapper extends EntityMapper<SubActionPTA, SubActionPTAReqDTO, SubActionPTAResDTO> {
+
+    @Named("ignoreTraining")
+    SubActionPTAResDTO toDtoWithout(SubActionPTA entity);
+
+    default List<SubActionPTAResDTO> toDtoList(List<SubActionPTA> entityList) {
+        return entityList.stream().map(this::toDtoWithout).collect(Collectors.toList());
+    }
+
+    default Page<SubActionPTAResDTO> toDtoPage(Page<SubActionPTA> entityPage) {
+        Pageable pageable = entityPage.getPageable();
+        List<SubActionPTAResDTO> dtoList = toDtoList(entityPage.getContent());
+        return new PageImpl<>(dtoList, pageable, entityPage.getTotalElements());
+    }
+}

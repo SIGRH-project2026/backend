@@ -1,0 +1,55 @@
+server:
+  port: 9080
+  servlet:
+    context-path: /api/v1/mfpai
+
+spring:
+  application:
+    name: backend-mfpai
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+    hikari:
+      max-lifetime: 9000
+      minimum-idle: 0
+      maximum-pool-size: 40
+
+  jpa:
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      ddl-auto: update
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT:25}
+    properties:
+      mail.smtp.auth: ${MAIL_SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${MAIL_SMTP_STARTTLS:false}
+      mail.smtp.from: ${MAIL_SMTP_FROM}
+
+url:
+  logo:
+    starterkit: ${LOGO_URL}
+
+app:
+  url:
+    front: ${FRONT_URL}
+
+smtp:
+  server:
+    host: ${SMTP_HOST}
+    from: ${SMTP_FROM}
+
+upload:
+  path: ${UPLOAD_PATH}
+  image: ${IMAGE_PATH}
+
+host:
+  url: ${HOST_PATH}

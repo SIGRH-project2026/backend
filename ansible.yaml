@@ -1,0 +1,10 @@
+- hosts: K8s
+  tasks:
+    - name: copier le fichier yaml sur k8s master
+      copy:
+        src: backendmfpai.yml
+        dest: /opt/
+    - name: faire le deployment sur kubernetes
+      command: sudo kubectl apply -f /opt/backendmfpai.yml
+    - name: creation du service 
+      command: sudo kubectl expose deployment backend-mfpai --type=NodePort --port=9083 --name=backend-mfpai-service --namespace=mfpai
