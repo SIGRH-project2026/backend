@@ -1,25 +1,26 @@
+# Maven
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### STS ###
+# STS / Eclipse
 .apt_generated
 .classpath
 .factorypath
 .project
-.settings
+.settings/
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
-.idea
+# IntelliJ IDEA
+.idea/
 *.iws
 *.iml
 *.ipr
 
-### NetBeans ###
+# NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
@@ -29,51 +30,30 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
+# VS Code
 .vscode/
 
+# =========================
+# Sensitive configuration
+# =========================
 
-### Sensitive Data ###
+# Spring Boot configuration containing secrets
 src/main/resources/application.yaml
-src/main/resources/application-dev.yaml
-=======
-HELP.md
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
-
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
-.vscode/
-
-
-### Sensitive Data ###
-src/main/resources/application.yaml
+src/main/resources/application.yml
 src/main/resources/application-*.yaml
 src/main/resources/application-*.yml
 
+!src/main/resources/application-example.yaml
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Local/private configuration
+*.local.yaml
+*.local.yml
+*.local.properties
+
+# Temporary / generated files
+tmp/
