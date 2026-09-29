@@ -4,6 +4,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import sn.gainde2000.backenmfpai.commons.utils.mail.MailService;
 import sn.gainde2000.backenmfpai.entities.serviceutilisateur.Utilisateur;
@@ -21,6 +23,27 @@ import sn.gainde2000.backenmfpai.web.dtos.responses.mails.MailInfosDTO;
 @Transactional
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements INotificationService {
+    @Override
+    public void sendNotificationDossierCreated(String email) {
+        if (email == null || email.isBlank()) {
+            return;
+        }
+        MailInfosDTO mail = new MailInfosDTO(null,
+                "Votre dossier agent a été créé. Vous pouvez le consulter dans votre espace personnel sur la plateforme SIGRH.",
+                "Création de votre dossier agent", null, email);
+        // Ne pas envoyer de confirmation si la création du dossier est annulée.
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    sendEmailAsync(mail);
+                }
+            });
+        } else {
+            sendEmailAsync(mail);
+        }
+    }
+
     private static final String RESET_PASSWORD_LINK = "reset-password";
     private static final String FORGET_PASSWORD_LINK = "forgot-password";
     private static final String TOKEN_NAME_IN_MAIL_NOTIFICATION = "token";

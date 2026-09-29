@@ -6,6 +6,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.ArgumentCaptor;
+import sn.gainde2000.backenmfpai.commons.Notification.INotification;
+import sn.gainde2000.backenmfpai.services.interfaces.serviceutilisateur.INotificationService;
+import sn.gainde2000.backenmfpai.commons.Notification.Notification;
+import sn.gainde2000.backenmfpai.exceptions.MFPAIException;
+import sn.gainde2000.backenmfpai.web.dtos.requests.servicecarriere.DossierAgentRequestDto;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sn.gainde2000.backenmfpai.entities.servicecarriere.dossieragent.Diplome;
 import sn.gainde2000.backenmfpai.entities.servicecarriere.dossieragent.DossierAgent;
@@ -35,6 +41,12 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DossierAgentImplTest {
+
+    @Mock
+    private INotification notificationService;
+
+    @Mock
+    private INotificationService emailNotificationService;
 
     @Mock
     private IDossierAgentRepository dossierAgentRepository;
@@ -95,7 +107,9 @@ class DossierAgentImplTest {
             iUtilisateurRepository,
             typeActeRepository,
             typeAARepository,
-            typeAGRepository
+            typeAGRepository,
+            notificationService,
+            emailNotificationService
         );
 
         // Initialisation des données de test
@@ -129,6 +143,95 @@ class DossierAgentImplTest {
         dossierResponseDto.setDiplomes(new ArrayList<>());
         dossierResponseDto.setSituationAdministrative(new ArrayList<>());
         dossierResponseDto.setEtatCivil(new ArrayList<>());
+    }
+
+    private DossierAgentRequestDto creationRequest() {
+        DossierAgentRequestDto dto = new DossierAgentRequestDto();
+        dto.setId(0L);
+        dto.setUtilisateurId(centralLevel.getId());
+        return dto;
+    }
+
+    private void verifyCreationNotification() {
+        verify(emailNotificationService).sendNotificationDossierCreated(centralLevel.getEmail());
+        ArgumentCaptor<Notification> notification = ArgumentCaptor.forClass(Notification.class);
+        verify(notificationService).notifyUser(notification.capture());
+        assertThat(notification.getValue().getIdUser()).isEqualTo(centralLevel.getId());
+        assertThat(notification.getValue().getCodeProfile()).isNull();
+        assertThat(notification.getValue().getObjet()).isEqualTo("Création de votre dossier agent");
+        assertThat(notification.getValue().getMessage()).contains("Votre dossier agent a été créé");
+    }
+
+    @Test
+    void creationNotifiesDossierOwner() throws Exception {
+        DossierAgentRequestDto dto = creationRequest();
+        when(dossierAgentMapper.toEntity(dto)).thenReturn(dossierAgent);
+        when(iUtilisateurRepository.findById(centralLevel.getId())).thenReturn(Optional.of(centralLevel));
+        when(dossierAgentRepository.save(dossierAgent)).thenReturn(dossierAgent);
+
+        assertThat(dossierAgentService.createDossier(dto)).isSameAs(dossierAgent);
+
+        verifyCreationNotification();
+        var order = inOrder(dossierAgentRepository, notificationService);
+        order.verify(dossierAgentRepository).save(dossierAgent);
+        order.verify(notificationService).notifyUser(any(Notification.class));
+    }
+
+    @Test
+    void updateDoesNotSendCreationNotification() throws Exception {
+        DossierAgentRequestDto dto = creationRequest();
+        dto.setId(dossierAgent.getId());
+        when(dossierAgentRepository.findById(dto.getId())).thenReturn(Optional.of(dossierAgent));
+
+        dossierAgentService.createDossier(dto);
+
+        verifyNoInteractions(notificationService, emailNotificationService);
+    }
+
+    @Test
+    void duplicateCreationDoesNotNotify() {
+        DossierAgentRequestDto dto = creationRequest();
+        when(dossierAgentMapper.toEntity(dto)).thenReturn(dossierAgent);
+        when(iUtilisateurRepository.findById(centralLevel.getId())).thenReturn(Optional.of(centralLevel));
+        when(dossierAgentRepository.findByUtilisateur(centralLevel)).thenReturn(Optional.of(dossierAgent));
+
+        assertThatThrownBy(() -> dossierAgentService.createDossier(dto)).isInstanceOf(MFPAIException.class);
+
+        verifyNoInteractions(notificationService, emailNotificationService);
+        verify(dossierAgentRepository, never()).save(any());
+    }
+
+    @Test
+    void failedSaveDoesNotNotify() {
+        DossierAgentRequestDto dto = creationRequest();
+        when(dossierAgentMapper.toEntity(dto)).thenReturn(dossierAgent);
+        when(iUtilisateurRepository.findById(centralLevel.getId())).thenReturn(Optional.of(centralLevel));
+        when(dossierAgentRepository.save(dossierAgent)).thenThrow(new IllegalStateException("Save failed"));
+
+        assertThatThrownBy(() -> dossierAgentService.createDossier(dto)).isInstanceOf(IllegalStateException.class);
+
+        verifyNoInteractions(notificationService, emailNotificationService);
+    }
+
+    @Test
+    void emptyDossierCreationNotifiesOwner() {
+        when(dossierAgentRepository.save(any(DossierAgent.class))).thenReturn(dossierAgent);
+        when(dossierAgentMapper.toDto(dossierAgent)).thenReturn(dossierResponseDto);
+
+        assertThat(dossierAgentService.createEmptyDossierForUser(centralLevel)).isSameAs(dossierResponseDto);
+
+        verifyCreationNotification();
+    }
+
+    @Test
+    void existingEmptyDossierDoesNotNotifyAgain() {
+        when(dossierAgentRepository.findByUtilisateur(centralLevel)).thenReturn(Optional.of(dossierAgent));
+        when(dossierAgentMapper.toDto(dossierAgent)).thenReturn(dossierResponseDto);
+
+        assertThat(dossierAgentService.createEmptyDossierForUser(centralLevel)).isSameAs(dossierResponseDto);
+
+        verifyNoInteractions(notificationService, emailNotificationService);
+        verify(dossierAgentRepository, never()).save(any());
     }
 
     @Test
