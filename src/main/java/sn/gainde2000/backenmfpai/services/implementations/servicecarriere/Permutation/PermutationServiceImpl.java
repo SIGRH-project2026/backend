@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import sn.gainde2000.backenmfpai.commons.Notification.Notification;
-import sn.gainde2000.backenmfpai.commons.Notification.NotificationRepository;
+import sn.gainde2000.backenmfpai.commons.Notification.INotification;
 import sn.gainde2000.backenmfpai.commons.utils.JasperGenerator;
 import sn.gainde2000.backenmfpai.entities.servicecarriere.MutationPermutation.Permutation;
 import sn.gainde2000.backenmfpai.entities.servicecarriere.MutationPermutation.QPermutation;
@@ -70,7 +70,7 @@ public class PermutationServiceImpl implements IPermutationService {
     private final IStatusPermutation iStatusPermutationRepository;
     private final TraitementPermutationRepository traitementPermutationRepository;
     private final INotificationService notificationService;
-    private  final NotificationRepository notificationRepository;
+    private final INotification iNotification;
     private final IProfilRepository iProfilRepository;
     private final CentralLevelRepository centralLevelRepository;
 
@@ -826,7 +826,7 @@ public class PermutationServiceImpl implements IPermutationService {
             notification.setObjet("Traitement permutation");
             notification.setMessage("Bonjour, \n une nouvelle demande de permutation vous a été transmise. \n Merci de procéder au traitement.");
             notification.setIdUser(deconcentratedLevel1.getId());
-            notificationRepository.save(notification);
+            iNotification.notifyUser(notification);
             System.out.println("#### Apres save notif deconcentre");
         }
         }
@@ -837,7 +837,7 @@ public class PermutationServiceImpl implements IPermutationService {
             notification.setMessage("Bonjour, \n une nouvelle demande de permutation vous a été transmise. \n Merci de procéder au traitement.");
             System.out.println("#### Avant save notif central");
             notification.setIdUser(centralLevel.getId());
-            notificationRepository.save(notification);
+            iNotification.notifyUser(notification);
             System.out.println("#### Apres save notif central");
         }
         }
