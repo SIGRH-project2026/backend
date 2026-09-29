@@ -8,7 +8,9 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @Configuration
 @EnableWebSocketMessageBroker
+@lombok.RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+    private final sn.gainde2000.backenmfpai.security.AllowedOrigins allowedOrigins;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -18,6 +20,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws").setAllowedOrigins("http://localhost:4200","http://10.3.130.200:32135/","https://sirh-formation.sec.gouv.sn/", "http://10.42.3.184:8080/").withSockJS();
+        registry.addEndpoint("/ws").setAllowedOrigins(allowedOrigins.values().toArray(String[]::new)).withSockJS();
     }
 }

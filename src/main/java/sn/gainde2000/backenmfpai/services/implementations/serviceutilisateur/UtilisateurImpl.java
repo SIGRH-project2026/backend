@@ -230,7 +230,6 @@ public class UtilisateurImpl implements IUtilisateur {
             }
 
             String password = PasswordGenerator.generateRandomString();
-            log.info("................password: = {}", password);
 
             deconcentratedLevel.setPassword(encoder.encode(password));
 
@@ -1739,7 +1738,6 @@ public class UtilisateurImpl implements IUtilisateur {
         } else {
             deconcentratedLevelDB.setEmail(dto.getEmail());
             String password = PasswordGenerator.generateRandomString();
-            log.info("................password: = {}", password);
             deconcentratedLevelDB.setPassword(encoder.encode(password));
             notificationService.sendNotificationToNewUserRegistred(
                     new LoginFormDTO(deconcentratedLevelDB.getEmail(), password), FIRST_CONNEXION);
@@ -1808,7 +1806,6 @@ public class UtilisateurImpl implements IUtilisateur {
         UserManager utilisateur = userManagerMapper.toEntity(dto);
         String password = PasswordGenerator.generateRandomString();
         utilisateur.setPassword(password);
-        log.info("................password: = {}", utilisateur.getPassword());
         utilisateur.setMatricule(dto.getMatricule());
         utilisateur.setPrenom(dto.getPrenom());
         utilisateur.setNom(dto.getNom());
@@ -1959,7 +1956,6 @@ public class UtilisateurImpl implements IUtilisateur {
             }
 
             String password = PasswordGenerator.generateRandomString();
-            log.info("................password: = {}", password);
             System.out.println(dto.getMatricule());
             centralLevel.setPassword(encoder.encode(password));
             centralLevel.setFirstLog(true);

@@ -26,6 +26,8 @@ import java.util.Set;
 @Service
 @Transactional
 public class ConvocationServiceImpl implements IConvocationService {
+    private final FormationNotifications formationNotifications;
+
 
     private final ConvocationRepository convocationRepository;
     private final FileRepository fileRepository;
@@ -34,7 +36,8 @@ public class ConvocationServiceImpl implements IConvocationService {
     private final FormationRepository formationRepository;
 
     public ConvocationServiceImpl(ConvocationRepository convocationRepository, FileRepository fileRepository,
-            FileService fileService, ConvocationDTO convocationDTO, FormationRepository formationRepository) {
+            FileService fileService, ConvocationDTO convocationDTO, FormationRepository formationRepository, FormationNotifications formationNotifications) {
+        this.formationNotifications = formationNotifications;
         this.convocationRepository = convocationRepository;
         this.fileRepository = fileRepository;
         this.fileService = fileService;
@@ -62,7 +65,9 @@ public class ConvocationServiceImpl implements IConvocationService {
             convocationEntity.setTdr(uploadedFile);
         }
 
-        return convocationRepository.save(convocationEntity);
+        Convocation saved = convocationRepository.save(convocationEntity);
+        formationNotifications.notifyConcerned(saved.getFormation(), "une convocation est disponible");
+        return saved;
     }
 
     @Override

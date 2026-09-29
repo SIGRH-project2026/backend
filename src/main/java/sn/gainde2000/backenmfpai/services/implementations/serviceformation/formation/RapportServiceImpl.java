@@ -24,6 +24,8 @@ import java.util.Set;
 @Service
 @Transactional
 public class RapportServiceImpl implements IRapportService {
+    private final FormationNotifications formationNotifications;
+
 
     private final RapportRepository rapportRepository;
     private final FileService fileService;
@@ -32,7 +34,8 @@ public class RapportServiceImpl implements IRapportService {
     private final RapportDTO rapportDTO;
 
     public RapportServiceImpl(RapportRepository rapportRepository, FileService fileService,
-            FileRepository fileRepository, FormationRepository formationRepository, RapportDTO rapportDTO) {
+            FileRepository fileRepository, FormationRepository formationRepository, RapportDTO rapportDTO, FormationNotifications formationNotifications) {
+        this.formationNotifications = formationNotifications;
         this.rapportRepository = rapportRepository;
         this.fileService = fileService;
         this.fileRepository = fileRepository;
@@ -84,7 +87,9 @@ public class RapportServiceImpl implements IRapportService {
 
         rapportEntity.setCommentaire(rapportDTO.getCommentaire());
 
-        return rapportRepository.save(rapportEntity);
+        Rapport saved = rapportRepository.save(rapportEntity);
+        formationNotifications.notifyConcerned(saved.getFormation(), "un rapport de formation est disponible");
+        return saved;
     }
 
     @Override

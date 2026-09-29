@@ -4,6 +4,7 @@ import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.querydsl.core.BooleanBuilder;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -48,6 +49,8 @@ import static sn.gainde2000.backenmfpai.services.implementations.servicecarriere
 @RequiredArgsConstructor
 @Transactional
 public class IPriseEnChargeImpl implements IPriseEnChargeService {
+    private final BusinessNotificationService businessNotifications;
+
 
     private final PriseEnChargeRepository priseEnChargeRepository;
     private final TraitementPriseEnChargeRepository traitementPriseEnChargeRepository;
@@ -98,11 +101,8 @@ public class IPriseEnChargeImpl implements IPriseEnChargeService {
             PriseEnCharge savedPriseEnCharge = priseEnChargeRepository.save(priseEnCharge);
         // envoie mail au demandeur
            String emailDemandeur = priseEnCharge.getUtilisateur().getEmail();
-            mailService.sendMail(new MailInfosDTO(null,
-                "Bonjour "+utilisateur.getPrenom()+" " +
-                        ""+utilisateur.getNom()+"\nVotre demande prise en charge N°"+ priseEnCharge.getNumeroDemande()+"  a été enregitrée avec succès",
-                "Création Demande de Prise en Charge",
-                null, utilisateur.getEmail()));
+            businessNotifications.notify(utilisateur, "Création Demande de Prise en Charge", "Bonjour "+utilisateur.getPrenom()+" " +
+                        ""+utilisateur.getNom()+"\nVotre demande prise en charge N°"+ priseEnCharge.getNumeroDemande()+"  a été enregitrée avec succès");
 
 
 
@@ -291,11 +291,8 @@ public class IPriseEnChargeImpl implements IPriseEnChargeService {
                     priseEnCharge.setMotifModification(motifModif);
                     // envoie mail au demandeur
                         String emailDemandeur = priseEnCharge.getUtilisateur().getEmail();
-                        mailService.sendMail(new MailInfosDTO(null,
-                                "Bonjour "+priseEnCharge.getUtilisateur().getPrenom()+" " +
-                                        ""+priseEnCharge.getUtilisateur().getNom()+"\nVotre demande prise en charge N°"+ priseEnCharge.getNumeroDemande()+"  vous est renvoyé pour modification",
-                                "Modification Demande de Prise en Charge",
-                                null, priseEnCharge.getUtilisateur().getEmail()));
+                        businessNotifications.notify(priseEnCharge.getUtilisateur(), "Modification Demande de Prise en Charge", "Bonjour "+priseEnCharge.getUtilisateur().getPrenom()+" " +
+                                        ""+priseEnCharge.getUtilisateur().getNom()+"\nVotre demande prise en charge N°"+ priseEnCharge.getNumeroDemande()+"  vous est renvoyé pour modification");
                         break;
                 }
                 case "rejeter": {
@@ -317,6 +314,11 @@ public class IPriseEnChargeImpl implements IPriseEnChargeService {
             traitementPriseEnCharge.setTraitant(agentResp);
             traitementPriseEnCharge.setTraitement(statutPriseEnCharge.getLibelle());
             TraitementPriseEnCharge saved=traitementPriseEnChargeRepository.save(traitementPriseEnCharge);
+            if ("rejeter".equals(traitement) || "valider".equals(traitement)) {
+                businessNotifications.notify(priseEnCharge.getUtilisateur(), "Suivi de votre prise en charge",
+                        "Votre demande de prise en charge n° " + priseEnCharge.getNumeroDemande()
+                                + " : " + statutPriseEnCharge.getLibelle() + ".");
+            }
           //  System.out.println("j'ai fait le traitement");
             return Response.ok()
                     .setPayload(priseEnChargeMapper.toDto(priseEnChargeRepository.save(priseEnCharge)))

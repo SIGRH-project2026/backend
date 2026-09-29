@@ -2,6 +2,7 @@ package sn.gainde2000.backenmfpai.services.implementations.serviceformation.stag
 
 import com.querydsl.core.BooleanBuilder;
 import lombok.RequiredArgsConstructor;
+import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,7 +33,10 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class DemandeStageService implements IDemandeStage {
+    private final BusinessNotificationService businessNotifications;
+
     private final DemandeStageMapper demandeStageMapper;
     private final DemandeStageRepository demandeStageRepository;
     private final DirectionRepository directionRepository;
@@ -149,6 +153,7 @@ public class DemandeStageService implements IDemandeStage {
         traitementDemandeStage.setStatutDemandeStage(statutDemandeRepository.findByCode("ENREGISTRER").get());
         traitementDemandeStageRepository.save(traitementDemandeStage);
 
+        notifyApplicant(saveDemandeStage, "enregistrée");
         DemandeStageResponse demandeStageResponse = demandeStageMapper.mapToDemandeStageResponse(saveDemandeStage);
 
         return Response.ok().setPayload(demandeStageResponse).setMessage("Demande de stage enregistrée avec succès.");
@@ -166,6 +171,10 @@ public class DemandeStageService implements IDemandeStage {
         Optional<DemandeStage> optionalDemandeStage = demandeStageRepository.findById(id);
         if (optionalDemandeStage.isEmpty())
             return Response.exception().setMessage("Demande stage introuvable.");
+        if (optionalDemandeStage.get().getStatutDemandeStage() != null
+                && "AUTORISER".equals(optionalDemandeStage.get().getStatutDemandeStage().getCode())) {
+            return Response.ok().setMessage("Cette décision a déjà été enregistrée.");
+        }
         optionalDemandeStage.get().setStatutDemandeStage(statutDemandeRepository.findByCode("AUTORISER").get());
         // traitement
         TraitementDemandeStage traitementDemandeStage = new TraitementDemandeStage();
@@ -179,6 +188,7 @@ public class DemandeStageService implements IDemandeStage {
         traitementDemandeStage.setStatutDemandeStage(statutDemandeRepository.findByCode("AUTORISER").get());
         traitementDemandeStageRepository.save(traitementDemandeStage);
         demandeStageRepository.save(optionalDemandeStage.get());
+        notifyApplicant(optionalDemandeStage.get(), "autorisée");
         return Response.ok().setMessage("Demande de stage autorisée.");
     }
 
@@ -205,6 +215,10 @@ public class DemandeStageService implements IDemandeStage {
         Optional<DemandeStage> optionalDemandeStage = demandeStageRepository.findById(id);
         if (optionalDemandeStage.isEmpty())
             return Response.exception().setMessage("Demande stage introuvable.");
+        if (optionalDemandeStage.get().getStatutDemandeStage() != null
+                && "NONAUTORISER".equals(optionalDemandeStage.get().getStatutDemandeStage().getCode())) {
+            return Response.ok().setMessage("Cette décision a déjà été enregistrée.");
+        }
         optionalDemandeStage.get().setStatutDemandeStage(statutDemandeRepository.findByCode("NONAUTORISER").get());
         CentralLevel centralLevel = centralLevelRepository.findByEmail(iUtilisateur.getCurrentUser().getEmail()).orElse(null);
         AvisDemandeStage avisDemaneStage = new AvisDemandeStage();
@@ -226,6 +240,7 @@ public class DemandeStageService implements IDemandeStage {
         traitementDemandeStage.setStatutDemandeStage(statutDemandeRepository.findByCode("NONAUTORISER").get());
         traitementDemandeStageRepository.save(traitementDemandeStage);
         demandeStageRepository.save(optionalDemandeStage.get());
+        notifyApplicant(optionalDemandeStage.get(), "refusée");
         return Response.ok().setMessage("Demande de stage non autorisée.");
     }
 
@@ -544,8 +559,8 @@ public class DemandeStageService implements IDemandeStage {
         for (CentralLevel centralLevel: centralLevels
              ) {
             // envoie au chef de division de la direction un mail
-            if (centralLevel.getProfils().contains("Chef-division"))
-                mailService.sendMail(new MailInfosDTO(null, "Bonjour "+centralLevel.getPrenom()+" "+centralLevel.getNom()+"\nune demande de stage (N°"+demandeStage.getNumero()+") vous est envoyée pour traitement.", "Imputation demande de stage", null, centralLevel.getEmail()));
+            if (centralLevel.getProfils().stream().anyMatch(p -> p.getCode() != null && p.getCode().startsWith("Chef-division")))
+                businessNotifications.notify(centralLevel, "Imputation demande de stage", "Bonjour "+centralLevel.getPrenom()+" "+centralLevel.getNom()+"\nune demande de stage (N°"+demandeStage.getNumero()+") vous est envoyée pour traitement.");
 
         }
         return Response.ok().setMessage("Demande de stage imputer");
@@ -586,6 +601,7 @@ public class DemandeStageService implements IDemandeStage {
         demandeStage.setDateFin(authorizedDemandeStageDTO.getDateFin());
         demandeStage.setDateDebut(authorizedDemandeStageDTO.getDateDebut());
         demandeStageRepository.save(demandeStage);
+        notifyApplicant(demandeStage, "autorisée");
         return Response.ok().setMessage("Autorisation de stage enregistée.");
     }
 
@@ -623,5 +639,10 @@ public class DemandeStageService implements IDemandeStage {
         nombreDemandeStageAutoriserNonAutoriserEnregistrer.setNombreDemandeStageAutoriser(demandeStageAutoriser);
         nombreDemandeStageAutoriserNonAutoriserEnregistrer.setNombreDemandeStageNonAutoriser(demandeStageNonAutoriser);
         return Response.ok().setPayload(nombreDemandeStageAutoriserNonAutoriserEnregistrer).setMessage("nombre de demande stage selon le statut");
+    }
+    private void notifyApplicant(DemandeStage demande, String action) {
+        businessNotifications.sendMail(new MailInfosDTO(null,
+                "Votre demande de stage n° " + demande.getNumero() + " a été " + action + ".",
+                "Suivi de votre demande de stage", null, demande.getMail()));
     }
 }

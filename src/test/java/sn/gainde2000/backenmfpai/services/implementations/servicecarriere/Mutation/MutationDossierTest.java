@@ -28,6 +28,7 @@ class MutationDossierTest {
     @Mock ITraitementMutationRepository traitements;
     @Mock FileImpl files;
     @Mock MutationMapper mapper;
+    @Mock sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService businessNotifications;
     @Spy @InjectMocks MutationImpl service;
     Mutation mutation;
     final String request = "{\"motif\":\"Signé\",\"idTraiteur\":2,\"codeStatutMutation\":\"REC-DR-CFP\"}";

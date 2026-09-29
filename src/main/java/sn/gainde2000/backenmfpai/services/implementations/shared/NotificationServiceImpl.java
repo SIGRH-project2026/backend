@@ -1,5 +1,7 @@
 package sn.gainde2000.backenmfpai.services.implementations.shared;
 
+import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,6 +58,7 @@ public class NotificationServiceImpl implements INotificationService {
     private static final String NOM_ORGANISATION = "Plateforme SIGRH";
     private final JwtProvider jwtProvider;
     private final MailService mailService;
+    private final BusinessNotificationService businessNotifications;
     private static final String SUIVI_PERMUTATION = "Suivi demande de permutation";
 
     @Value("${app.url.front}")
@@ -125,7 +128,7 @@ public class NotificationServiceImpl implements INotificationService {
                  """.formatted(id,statut,traitant);
 
         MailInfosDTO mailInfosDTO = new MailInfosDTO(null, textMessage, SUIVI_PERMUTATION, null, loginFormDTO.login());
-        sendEmail(mailInfosDTO);
+        businessNotifications.sendMail(mailInfosDTO);
     }
 
     @Override

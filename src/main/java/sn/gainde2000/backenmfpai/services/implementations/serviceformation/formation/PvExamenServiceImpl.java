@@ -24,6 +24,8 @@ import sn.gainde2000.backenmfpai.web.dtos.responses.FileRspDTO;
 @Service
 @Transactional
 public class PvExamenServiceImpl implements IPvExamenService {
+    private final FormationNotifications formationNotifications;
+
 
     private final PvExamenRepository pvExamenRepository;
     private final FileRepository fileRepository;
@@ -32,7 +34,8 @@ public class PvExamenServiceImpl implements IPvExamenService {
     private final FormationRepository formationRepository;
 
     public PvExamenServiceImpl(PvExamenRepository pvExamenRepository, FileRepository fileRepository,
-            FileService fileService, FormationRepository formationRepository) {
+            FileService fileService, FormationRepository formationRepository, FormationNotifications formationNotifications) {
+        this.formationNotifications = formationNotifications;
         this.pvExamenRepository = pvExamenRepository;
         this.fileRepository = fileRepository;
         this.fileService = fileService;
@@ -58,7 +61,9 @@ public class PvExamenServiceImpl implements IPvExamenService {
             pvExamenEntity.setFile(uploadedFile);
         }
 
-        return pvExamenRepository.save(pvExamenEntity);
+        PvExamen saved = pvExamenRepository.save(pvExamenEntity);
+        formationNotifications.notifyConcerned(saved.getFormation(), "un procès-verbal d’examen est disponible");
+        return saved;
     }
 
     @Override
