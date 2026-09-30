@@ -3,6 +3,7 @@ package sn.gainde2000.backenmfpai.services.implementations.servicecarriere.Mutat
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.BooleanBuilder;
 import lombok.RequiredArgsConstructor;
+import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.JRException;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,6 +64,8 @@ import static sn.gainde2000.backenmfpai.entities.servicecarriere.Mutation.QMutat
 @Slf4j
 @RequiredArgsConstructor
 public class MutationImpl implements Imutation {
+    private final BusinessNotificationService businessNotifications;
+
     private final ImutationRepository imutationRepository;
     private final IUtilisateurRepository iUtilisateurRepository;
     private final IStatutMutationRepository iStatutMutationRepository;
@@ -133,7 +136,7 @@ public class MutationImpl implements Imutation {
             //set le profile traitant
             String profilTraitant = profilTraitant(utilisateur,origineDemandeurLog, utilisateur.getTypeUser());
             Profile profile = iProfilRepository.findProfileByCode(profilTraitant);
-            mailService.sendMail(new MailInfosDTO(null, "Bonjour " + mutation.getDemandeur().getPrenom() + " " + mutation.getDemandeur().getNom() + " votre demande de mutation N°" + mutation.getNumeroRef() + " a été envoyée à votre "+profile.getLabel()+" pour traitement.", "Demande de mutation", null, mutation.getDemandeur().getEmail()));
+            businessNotifications.notify(mutation.getDemandeur(), "Demande de mutation", "Bonjour " + mutation.getDemandeur().getPrenom() + " " + mutation.getDemandeur().getNom() + " votre demande de mutation N°" + mutation.getNumeroRef() + " a été envoyée à votre "+profile.getLabel()+" pour traitement.");
 
             mutation.setProfilDevantTraiter(profilTraitant);
             mutation = imutationRepository.saveAndFlush(mutation);
@@ -149,10 +152,10 @@ public class MutationImpl implements Imutation {
             profilesTraiteurs.add("bureau-mo-rec");
             List<Utilisateur> usersTraiteurs = iUtilisateurRepository.findByProfileCodes(profilesTraiteurs);
             for (Utilisateur u : usersTraiteurs) {
-                mailService.sendMail(new MailInfosDTO(null, "Bonjour " + u.getPrenom() + " " + u.getNom() + "\nLa demande de mutation N°" + mutation.getNumeroRef() + "vous a été soumise.\nMerci de procéder au traitement.", "Demande de mutation", null, u.getEmail()));
+                businessNotifications.notify(u, "Demande de mutation", "Bonjour " + u.getPrenom() + " " + u.getNom() + "\nLa demande de mutation N°" + mutation.getNumeroRef() + "vous a été soumise.\nMerci de procéder au traitement.");
             }*/
             //for test
-            //  mailService.sendMail(new MailInfosDTO(null, "Bonjour " + "Baba" + " " + "TOP" + "\nLa demande de mutation N°" + mutation.getNumeroRef() + "vous a été soumise.\nMerci de procéder au traitement.", "Demande de mutation", null, "top.baba@ugb.edu.sn"));
+            //  businessNotifications.sendMail(new MailInfosDTO(null, "Bonjour " + "Baba" + " " + "TOP" + "\nLa demande de mutation N°" + mutation.getNumeroRef() + "vous a été soumise.\nMerci de procéder au traitement.", "Demande de mutation", null, "top.baba@ugb.edu.sn"));
 
             return Response.ok().setPayload(mutationMapper.toDto(mutation))
                     .setMessage("Demande de mutation envoyée avec succés");
@@ -232,6 +235,8 @@ public class MutationImpl implements Imutation {
             mutation.setTraitementMutation(traitementMutation);
             mutation = imutationRepository.saveAndFlush(mutation);
 
+            businessNotifications.notify(mutation.getDemandeur(), "Suivi de votre mutation",
+                    "Votre demande de mutation n° " + mutation.getNumeroRef() + " : " + statutMutation.getLibelle() + ".");
             return Response.ok().setPayload(mutationMapper.toDto(mutation)).setMessage("Mutation " +statutMutation.getLibelle());
         }catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -567,6 +572,7 @@ public class MutationImpl implements Imutation {
     }
 
     @Override
+    @Transactional
     public Response<Object>  validerMutation(Long idMutation, Long idTraitant, MultipartFile file){
         try {
             Response<Object> uploadResult = fileImpl.uploadSingleFile(file, idMutation, "mutation");
@@ -612,14 +618,22 @@ public class MutationImpl implements Imutation {
                 mutation.setProfilDevantTraiter(profilTraitant);
 
                 imutationRepository.save(mutation);
-                mailService.sendMail(new MailInfosDTO(null, "Bonjour " + mutation.getDemandeur().getPrenom() + " " + mutation.getDemandeur().getNom() + " votre demande de mutation N°" + mutation.getNumeroRef() +" a été validée par le chef de division de la DGPEEC.\n  L'OS vous est envoyé par mail.", "Demande de mutation", null, mutation.getDemandeur().getEmail()));
+                businessNotifications.notify(mutation.getDemandeur(), "Demande de mutation", "Bonjour " + mutation.getDemandeur().getPrenom() + " " + mutation.getDemandeur().getNom() + " votre demande de mutation N°" + mutation.getNumeroRef() +" a été validée par le chef de division de la DGPEEC.\n  L'OS vous est envoyé par mail.");
 
             }
-            for(String mail : mutation.getEmailsTraitant())
-                mailService.sendMailWithPJ(new MailInfosDTO(null, "Bonjour \nVeuillez recevoir en piéce en jointe la liste des mutations validées.", "Mutation(s) validée(s)", null, mail), generatedName);
+            for(String mail : mutation.getEmailsTraitant()) {
+                MailInfosDTO message = new MailInfosDTO(null, "Bonjour \nVeuillez recevoir en pièce jointe la liste des mutations validées.", "Mutation(s) validée(s)", null, mail);
+                org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+                        new org.springframework.transaction.support.TransactionSynchronization() {
+                            @Override public void afterCommit() {
+                                mailService.sendMailWithPJ(message, generatedName);
+                            }
+                        });
+            }
 
             return Response.ok().setPayload(mutation).setMessage("Ordre de service chargé");
         }catch (Exception e){
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return Response.exception().setMessage("Echec lors du chargement de l'ordre de service");
         }
     }
@@ -905,7 +919,7 @@ public class MutationImpl implements Imutation {
         if(!deconcentratedLevel.isEmpty()){
             for (DeconcentratedLevel deconcentratedLevel1 : deconcentratedLevel){
                 notification.setIdUser(deconcentratedLevel1.getId());
-                iNotification.notifyUser(notification);
+                businessNotifications.notifyUser(notification);
                 Set<String>  emails = mutation.getEmailsTraitant();
                 emails.add(deconcentratedLevel.get(0).getEmail());
                 mutation.setEmailsTraitant(emails);
@@ -914,7 +928,7 @@ public class MutationImpl implements Imutation {
         if(!centralLevels.isEmpty()){
             for (CentralLevel centralLevel : centralLevels){
                 notification.setIdUser(centralLevel.getId());
-                iNotification.notifyUser(notification);
+                businessNotifications.notifyUser(notification);
                 Set<String>  emails = mutation.getEmailsTraitant();
                 emails.add(centralLevel.getEmail());
                 mutation.setEmailsTraitant(emails);
@@ -922,21 +936,7 @@ public class MutationImpl implements Imutation {
 
             }
         }
-        if(ancienProf != null && !Objects.equals(ancienProf.getCode(), "Chef-division-dgpeec") && !Objects.equals(ancienProf.getCode(), "Directeur-DRH"))
-            mailService.sendMail(new MailInfosDTO(null, "Bonjour " + mutation.getDemandeur().getPrenom() + " " + mutation.getDemandeur().getNom() + " votre demande de mutation N°" + mutation.getNumeroRef() +" a été validée par votre "+ancienProf.getLabel()+".", "Demande de mutation", null, mutation.getDemandeur().getEmail()));
 
-        if(Objects.equals(ancienProf.getCode(), "Chef-division-dgpeec"))
-        {
-            if(Objects.equals(mutation.getTraitementMutation().getStatut().getCode(), "REJETER"))
-                mailService.sendMail(new MailInfosDTO(null, "Bonjour " + mutation.getDemandeur().getPrenom() + " " + mutation.getDemandeur().getNom() + " votre demande de mutation N°" + mutation.getNumeroRef() +" a été rejetée par le chef de division de la DGPEEC.", "Demande de mutation", null, mutation.getDemandeur().getEmail()));
-            else if(Objects.equals(mutation.getTraitementMutation().getStatut().getCode(), "AMODIFIER"))
-                mailService.sendMail(new MailInfosDTO(null, "Bonjour " + mutation.getDemandeur().getPrenom() + " " + mutation.getDemandeur().getNom() + " votre demande de mutation N°" + mutation.getNumeroRef() +" a été renvoyée pour modification par le chef de division de la DGPEEC.", "Demande de mutation", null, mutation.getDemandeur().getEmail()));
-
-        }
-        if(Objects.equals(ancienProf.getCode(), "Directeur-DRH"))
-        {mailService.sendMail(new MailInfosDTO(null, "Bonjour " + mutation.getDemandeur().getPrenom() + " " + mutation.getDemandeur().getNom() + " votre demande de mutation N°" + mutation.getNumeroRef() +" est en cours de traitement au niveau de la DGPEEC.", "Demande de mutation", null, mutation.getDemandeur().getEmail()));
-
-        }
     }
 }
 

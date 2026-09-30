@@ -1,6 +1,7 @@
 package sn.gainde2000.backenmfpai.services.implementations.serviceformation.expressionbesoin;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sn.gainde2000.backenmfpai.commons.utils.mail.MailService;
@@ -35,6 +36,8 @@ import java.util.ArrayList;
 @Service
 @RequiredArgsConstructor
 public class ExpressionDeBesoinService implements IExpressionDeBesoin {
+    private final BusinessNotificationService businessNotifications;
+
     private final ExpressionDeBesoinRepository expressionDeBesoinRepository;
     private final CampagneRepository campagneRepository;
     private final ExpressionDeBesoinMapper expressionDeBesoinMapper;
@@ -57,7 +60,7 @@ public class ExpressionDeBesoinService implements IExpressionDeBesoin {
     @Override
     @Transactional
     public Response<Object> saveExpressionDeBesoin(ExpressionDeBesoinDTO expressionDeBesoinDTO, long idCampagne, HttpServletRequest request) {
-//        mailService.sendMail(new MailInfosDTO(null, "Bonjour \nUne epxressionde besoin vous a été soumise.\nMerci de procéder au traitement.", "Expression de besoin", null, "chefdivision@yopmail.com"));
+//        businessNotifications.sendMail(new MailInfosDTO(null, "Bonjour \nUne epxressionde besoin vous a été soumise.\nMerci de procéder au traitement.", "Expression de besoin", null, "chefdivision@yopmail.com"));
 
         Optional<Campagne> optionalCampagne = campagneRepository.findByIdAndDeletedFalse(idCampagne);
         if (optionalCampagne.isEmpty())
@@ -84,13 +87,15 @@ public class ExpressionDeBesoinService implements IExpressionDeBesoin {
 
             traitementExpressionDeBesoin.setStatutExpressionDeBesoin(statutExpressionDeBesoinRepository.findByCode(StatutExpressionDeBesoinEnum.NON_TRAITER.name()).get());
             traitementExpressionDeBesoinRepository.save(traitementExpressionDeBesoin);
+            businessNotifications.notify(expressionDeBesoin.getUtilisateur(), "Création de votre expression de besoin",
+                    "Votre expression de besoin " + expressionDeBesoinSaved.getReference() + " a été enregistrée.");
         }catch (Exception e){
-            e.printStackTrace();
+            throw new IllegalStateException("Échec de création de l’expression de besoin", e);
         }
 
 
         // Chef de division, Chef de Bureau,Agent Bureau : ENVOIE MAIL
-        List<String> profileTraitants = new ArrayList<>(Arrays.asList("Chef-division","Chef-bureau","Agend-bureau"));
+        List<String> profileTraitants = new ArrayList<>(Arrays.asList("Chef-division","Chef-bureau","Agent-bureau"));
 
         List<Utilisateur> utilisateurs = iUtilisateurRepository.findByProfileCodes(profileTraitants);
         for (Utilisateur centralLevel: utilisateurs
@@ -101,7 +106,7 @@ public class ExpressionDeBesoinService implements IExpressionDeBesoin {
             }).toList();
 
             if (containsOneRole(profils,profileTraitants)){
-                mailService.sendMail(new MailInfosDTO(null, "Bonjour "+centralLevel.getPrenom()+" "+centralLevel.getNom()+"\nUne epxressionde besoin vous a été soumise.\nMerci de procéder au traitement.", "Expression de besoin", null, centralLevel.getEmail()));
+                businessNotifications.notify(centralLevel, "Expression de besoin", "Bonjour "+centralLevel.getPrenom()+" "+centralLevel.getNom()+"\nUne epxressionde besoin vous a été soumise.\nMerci de procéder au traitement.");
             }
         }
         return Response.ok().setMessage("Expression de besoin créer avec succès.");
@@ -222,8 +227,8 @@ public class ExpressionDeBesoinService implements IExpressionDeBesoin {
 
             // envoie mail au demandeur
             String emailDemandeur = expressionDeBesoin.getUtilisateur().getEmail();
-            Utilisateur utilisateur = iUtilisateurRepository.findUtilisateurByEmail(emailDemandeur).get();
-            mailService.sendMail(new MailInfosDTO(null, "Bonjour "+utilisateur.getPrenom()+" "+utilisateur.getNom()+"\nVotre  demande d'expressions des besoins a éte traité avec succès", "Traitement expression de besoin", null, utilisateur.getEmail()));
+            Utilisateur utilisateur = expressionDeBesoin.getUtilisateur();
+            businessNotifications.notify(utilisateur, "Traitement expression de besoin", "Bonjour "+utilisateur.getPrenom()+" "+utilisateur.getNom()+"\nVotre  demande d'expressions des besoins a éte traité avec succès");
 
         }
         if (ids_.length > 1)

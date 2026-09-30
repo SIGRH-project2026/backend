@@ -33,6 +33,7 @@ public class JwtProvider {
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration ))
                 //.setExpiration(new Date(System.currentTimeMillis() + (long) jwtExpiration * 60 * 1000))
+                .claim("token_use", "access")
                 .claim("authorities", authentication.getAuthorities())
                 .claim(INFOS, utilisateurPrinciple.getUtilisateurInfo())
                 .signWith(getSignatureKey())
@@ -44,6 +45,7 @@ public class JwtProvider {
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 //.setExpiration(new Date(System.currentTimeMillis() + (long) jwtExpiration * 60 * 1000))
+                .claim("token_use", "mail")
                 .claim(INFOS, infos)
                 .signWith(getSignatureKey())
                 .compact();
@@ -56,6 +58,7 @@ public class JwtProvider {
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtRefreshToken ))
                 //.setExpiration(new Date(System.currentTimeMillis() + (long) jwtRefreshToken * 60 * 1000))
+                .claim("token_use", "refresh")
                 .claim("authorities", claims.get("authorities"))
                 .claim(INFOS, claims.get(INFOS))
                 .signWith(getSignatureKey())
@@ -63,15 +66,34 @@ public class JwtProvider {
     }
 
     public String generateAccessTokenFromRefreshToken(String token) {
-        Claims claims = Jwts.parserBuilder().setSigningKey(getSignatureKey()).build().parseClaimsJws(token).getBody();
+        Claims claims = Jwts.parserBuilder().setSigningKey(getSignatureKey()).require("token_use", "refresh").build().parseClaimsJws(token).getBody();
         return Jwts.builder()
                 .setSubject(claims.getSubject())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .claim("token_use", "access")
                 .claim("authorities", claims.get("authorities"))
                 .claim(INFOS, claims.get(INFOS))
                 .signWith(getSignatureKey())
                 .compact();
+    }
+
+    public boolean validationAccessToken(String token) {
+        return hasPurpose(token, "access");
+    }
+
+    public boolean validationRefreshToken(String token) {
+        return hasPurpose(token, "refresh");
+    }
+
+    private boolean hasPurpose(String token, String purpose) {
+        try {
+            Jwts.parserBuilder().setSigningKey(getSignatureKey()).require("token_use", purpose)
+                    .build().parseClaimsJws(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException exception) {
+            return false;
+        }
     }
 
     public boolean validationJwtToken(String authtoken) {

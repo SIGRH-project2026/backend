@@ -1,5 +1,9 @@
 package sn.gainde2000.backenmfpai.services.implementations.serviceformation.planformation;
 
+import org.springframework.transaction.annotation.Transactional;
+
+import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -41,7 +45,10 @@ import sn.gainde2000.backenmfpai.web.dtos.responses.Response;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class PlanFormationServiceImpl implements IPlanFormationService {
+    private final BusinessNotificationService businessNotifications;
+
     private final PlanFormationRepository planFormationRepository;
     private final PlanFormationMapper planFormationMapper;
     private final IUtilisateurRepository utilisateurRepository;
@@ -118,7 +125,10 @@ public class PlanFormationServiceImpl implements IPlanFormationService {
             }
 
             // Enregistrer le Plan de formation
-            return planFormationRepository.save(planFormation);
+            PlanFormation saved = planFormationRepository.save(planFormation);
+            businessNotifications.notify(createdByUser, "Création du plan de formation",
+                    "Le plan de formation " + saved.getReference() + " a été créé.");
+            return saved;
 
         } else {
             // Gérer le cas où l'utilisateur n'est pas trouvé
@@ -196,10 +206,15 @@ public class PlanFormationServiceImpl implements IPlanFormationService {
         }
 
         // Modifier le statut du plan de formation
+        boolean changed = planFormation.getStatutPlanFormation() == null
+                || !java.util.Objects.equals(planFormation.getStatutPlanFormation().getCode(), statutCode);
         planFormation.setStatutPlanFormation(statutPlanFormation);
 
         // Enregistrer et retourner le plan de formation modifié
-        return planFormationRepository.save(planFormation);
+        PlanFormation saved = planFormationRepository.save(planFormation);
+        if (changed) businessNotifications.notify(saved.getCreatedBy(), "Suivi du plan de formation",
+                "Plan de formation " + saved.getReference() + " : statut " + statutCode + ".");
+        return saved;
     }
 
     /*Baba dieme*/

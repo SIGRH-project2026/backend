@@ -1,5 +1,7 @@
 package sn.gainde2000.backenmfpai.services.implementations.serviceformation.formation;
 
+import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
+
 import org.jfree.util.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +41,8 @@ import java.util.Set;
 @Transactional
 // @Sl4j
 public class OffreTechniqueFinanciereServiceImpl implements IOffreTechniqueFinanciereService {
+    private final BusinessNotificationService businessNotifications;
+
 
     private final OffreTechniqueFinanciereRepository offreTechniqueFinanciereRepository;
     private final FileService fileService;
@@ -53,7 +57,9 @@ public class OffreTechniqueFinanciereServiceImpl implements IOffreTechniqueFinan
             OffreTechniqueFinanciereRepository offreTechniqueFinanciereRepository,
             FileService fileService,
             FileRepository fileRepository, FormationRepository formationRepository,
-            OffreTechniqueFinanciereDTO offreTechniqueFinanciereDTO) {
+            OffreTechniqueFinanciereDTO offreTechniqueFinanciereDTO,
+            BusinessNotificationService businessNotifications) {
+        this.businessNotifications = businessNotifications;
         this.offreTechniqueFinanciereRepository = offreTechniqueFinanciereRepository;
         this.fileService = fileService;
         this.fileRepository = fileRepository;
@@ -103,7 +109,10 @@ public class OffreTechniqueFinanciereServiceImpl implements IOffreTechniqueFinan
         }
         offreTechniqueFinanciereEntity.setCommentaire(offreTechniqueFinanciereDTO.getCommentaire());
 
-        return offreTechniqueFinanciereRepository.save(offreTechniqueFinanciereEntity);
+        OffreTechniqueFinanciere saved = offreTechniqueFinanciereRepository.save(offreTechniqueFinanciereEntity);
+        businessNotifications.notify(user, "Offre technique et financière",
+                "Votre offre pour la formation " + formation.getReference() + " a été enregistrée.");
+        return saved;
     }
 
     // @Override
@@ -150,12 +159,16 @@ public class OffreTechniqueFinanciereServiceImpl implements IOffreTechniqueFinan
         }
 
         // Mettre à jour le statut de la formation avec le nouveau statut
+        boolean changed = offre.getStatutOffreTechnique() == null
+                || !java.util.Objects.equals(offre.getStatutOffreTechnique().getCode(), newStatutOffreCode);
         offre.setStatutOffreTechnique(newStatutOffre);
 
         // Enregistrer la formation mise à jour dans la base de données
         OffreTechniqueFinanciere savedOffre = offreTechniqueFinanciereRepository.save(offre);
 
         // Mapper la formation mise à jour vers le DTO et le retourner
+        if (changed) businessNotifications.notify(savedOffre.getChefeff(), "Suivi de votre offre",
+                "Offre pour la formation " + savedOffre.getFormation().getReference() + " : statut " + newStatutOffreCode + ".");
         return mapToDTO(savedOffre);
     }
 

@@ -1,5 +1,9 @@
 package sn.gainde2000.backenmfpai.services.implementations.serviceformation.stage;
 
+import org.springframework.transaction.annotation.Transactional;
+
+import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import sn.gainde2000.backenmfpai.entities.serviceformation.stage.AttestationStage;
@@ -17,7 +21,10 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AttestationService implements IAttestionStage {
+    private final BusinessNotificationService businessNotifications;
+
     private final DemandeStageRepository demandeStageRepository;
     private final CentralLevelRepository centralLevelRepository;
     private final AttestationStageRepository attestationStageRepository;
@@ -40,6 +47,10 @@ public class AttestationService implements IAttestionStage {
         attestationStage.setCommentaire(attestationStage.getCommentaire());
         optionalDemandeStage.get().setHaveAttestation(true);
         demandeStageRepository.save(optionalDemandeStage.get());
-        return Response.ok().setPayload(attestationStageRepository.save(attestationStage)).setMessage("Attestation de stage enregistrée avec succès.");
+        AttestationStage saved = attestationStageRepository.save(attestationStage);
+        businessNotifications.sendMail(new sn.gainde2000.backenmfpai.web.dtos.responses.mails.MailInfosDTO(null,
+                "Votre attestation de stage pour la demande n° " + optionalDemandeStage.get().getNumero() + " est disponible.",
+                "Attestation de stage", null, optionalDemandeStage.get().getMail()));
+        return Response.ok().setPayload(saved).setMessage("Attestation de stage enregistrée avec succès.");
     }
 }

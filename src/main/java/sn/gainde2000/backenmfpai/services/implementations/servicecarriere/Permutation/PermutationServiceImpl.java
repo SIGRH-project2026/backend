@@ -3,6 +3,7 @@ package sn.gainde2000.backenmfpai.services.implementations.servicecarriere.Permu
 import com.querydsl.core.BooleanBuilder;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.JRException;
 import org.apache.commons.lang3.StringUtils;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import sn.gainde2000.backenmfpai.commons.Notification.Notification;
-import sn.gainde2000.backenmfpai.commons.Notification.NotificationRepository;
+import sn.gainde2000.backenmfpai.commons.Notification.INotification;
 import sn.gainde2000.backenmfpai.commons.utils.JasperGenerator;
 import sn.gainde2000.backenmfpai.entities.servicecarriere.MutationPermutation.Permutation;
 import sn.gainde2000.backenmfpai.entities.servicecarriere.MutationPermutation.QPermutation;
@@ -57,7 +58,10 @@ import static sn.gainde2000.backenmfpai.entities.servicecarriere.MutationPermuta
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional
 public class PermutationServiceImpl implements IPermutationService {
+    private final BusinessNotificationService businessNotifications;
+
 
     private final IUtilisateurRepository iUtilisateurRepository;
     private final IPermutationRepository iPermutationRepository;
@@ -70,7 +74,7 @@ public class PermutationServiceImpl implements IPermutationService {
     private final IStatusPermutation iStatusPermutationRepository;
     private final TraitementPermutationRepository traitementPermutationRepository;
     private final INotificationService notificationService;
-    private  final NotificationRepository notificationRepository;
+    private final INotification iNotification;
     private final IProfilRepository iProfilRepository;
     private final CentralLevelRepository centralLevelRepository;
 
@@ -113,7 +117,10 @@ public class PermutationServiceImpl implements IPermutationService {
                 emailsTraitant.add(user1Optional.get().getEmail());
                 permutation.setEmailTraitant(emailsTraitant);
                 Permutation permutationSaved = iPermutationRepository.save(permutation);
-                sendPlateformeNotification(permutationSaved, permutationSaved.getUtilisateur2().getProfils().stream().findAny().get().getCode(), "DEC");
+                businessNotifications.notify(permutationSaved.getUtilisateur1(), "Création de votre permutation",
+                        "Votre demande de permutation n° " + permutationSaved.getId() + " a été enregistrée.");
+                businessNotifications.notify(permutationSaved.getUtilisateur2(), "Demande de permutation à accepter",
+                        "La demande de permutation n° " + permutationSaved.getId() + " vous a été transmise pour accord.");
                 return permutationSaved;
             }else
                 throw new IllegalArgumentException("Les agents doivent avoir la même spécialité, le même corps et des établissements différents");
@@ -347,6 +354,20 @@ public class PermutationServiceImpl implements IPermutationService {
 
     @Override
     public PermutationResponseDto traiterPermutation(long id, String action, String motif, String type) {
+        PermutationResponseDto result = traiterPermutationInternal(id, action, motif, type);
+        if (result != null) {
+            Permutation permutation = iPermutationRepository.findById(id).orElseThrow();
+            String message = "Votre demande de permutation n° " + id + " : "
+                    + permutation.getTraitementPermutation().getStatut().getLibelle() + ".";
+            businessNotifications.notify(permutation.getUtilisateur1(), "Suivi de votre permutation", message);
+            if (!Objects.equals(permutation.getUtilisateur1().getId(), permutation.getUtilisateur2().getId())) {
+                businessNotifications.notify(permutation.getUtilisateur2(), "Suivi de votre permutation", message);
+            }
+        }
+        return result;
+    }
+
+    private PermutationResponseDto traiterPermutationInternal(long id, String action, String motif, String type) {
         Utilisateur currentUser = iUtilisateur.getCurrentUser();
         StatusPermutation status = new StatusPermutation();
         if(currentUser.getProfils().stream().findAny().get().getCode().equals("Professeur") ||
@@ -408,11 +429,7 @@ public class PermutationServiceImpl implements IPermutationService {
                     permutation.setTraitementPermutation(traitementPermutationSaved);
                     permutation.setNiveau(0);
                     Permutation permutationSaved = iPermutationRepository.save(permutation);
-                    notificationService.sendNotificationDemandeurPermutation(
-                            new LoginFormDTO(permutation.getUtilisateur1().getEmail(),""),
-                            "le chef de division DGPEEC",
-                            permutation.getId(),"renvoyée pour modification"
-                    );
+
                     return permutationMapper.toDto(permutationSaved);
                 } else if (action.equals("REJETER")) {
                     System.out.println("\n ##### rejeter \n");
@@ -449,22 +466,14 @@ public class PermutationServiceImpl implements IPermutationService {
                             permutation.setValidateIaDemandeur(true);
                         }
                         iPermutationRepository.save(permutation);
-                        notificationService.sendNotificationDemandeurPermutation(
-                                new LoginFormDTO(permutation.getUtilisateur1().getEmail(),""),
-                                permutation.getIaDemandeur().getLabel(),
-                                permutation.getId(),"validée"
-                        );
+
                     } else if (permutation.getIaDemandeur().getCode().equals(deconcentratedLevelRepository.findByMatricule(currentUser.getMatricule()).get().getIa().getCode())) {
                         permutation.setValidateIaDemandeur(true);
                         if (permutation.getIaReceveur().getCode().equals(permutation.getIaDemandeur().getCode())) {
                             permutation.setValidateIaReceveur(true);
                         }
                         iPermutationRepository.save(permutation);
-                        notificationService.sendNotificationDemandeurPermutation(
-                                new LoginFormDTO(permutation.getUtilisateur1().getEmail(),""),
-                                permutation.getIaReceveur().getLabel(),
-                                permutation.getId(),"validée"
-                        );
+
                     }
                     if (permutation.isValidateIaDemandeur() && permutation.isValidateIaReceveur()) {
                             String  profilTraitant = "Directeur-DRH";
@@ -504,22 +513,14 @@ public class PermutationServiceImpl implements IPermutationService {
                             permutation.setValidateIefReceveur(true);
                         }
                         iPermutationRepository.save(permutation);
-                        notificationService.sendNotificationDemandeurPermutation(
-                                new LoginFormDTO(permutation.getUtilisateur1().getEmail(),""),
-                                permutation.getIefDemandeur().getLabel(),
-                                permutation.getId(),"validée"
-                        );
+
                     }else if(permutation.getIefReceveur().getCode().equals(deconcentratedLevelRepository.findByMatricule(currentUser.getMatricule()).get().getIef().getCode())){
                         permutation.setValidateIefReceveur(true);
                         if (permutation.getIefReceveur().getCode().equals(permutation.getIefDemandeur().getCode())) {
                             permutation.setValidateIefDemandeur(true);
                         }
                         iPermutationRepository.save(permutation);
-                        notificationService.sendNotificationDemandeurPermutation(
-                                new LoginFormDTO(permutation.getUtilisateur1().getEmail(),""),
-                                permutation.getIefReceveur().getLabel(),
-                                permutation.getId(),"validée"
-                        );
+
                     }
                     if(permutation.isValidateIefDemandeur() && permutation.isValidateIefReceveur()){
                         System.out.println("ici recue");
@@ -559,19 +560,11 @@ public class PermutationServiceImpl implements IPermutationService {
                         if (permutation.getEtablissementDemandeur().getCode().equals(deconcentratedLevelRepository.findByMatricule(currentUser.getMatricule()).get().getEtablissement().getCode())){
                             permutation.setValidateEtabDemandeur(true);
                             iPermutationRepository.save(permutation);
-                            notificationService.sendNotificationDemandeurPermutation(
-                                    new LoginFormDTO(permutation.getUtilisateur1().getEmail(),""),
-                                    permutation.getEtablissementDemandeur().getLabel(),
-                                    permutation.getId(),"validée"
-                            );
+
                         }else if(permutation.getEtablissementReceveur().getCode().equals(deconcentratedLevelRepository.findByMatricule(currentUser.getMatricule()).get().getEtablissement().getCode())){
                             permutation.setValidateEtabReceveur(true);
                             iPermutationRepository.save(permutation);
-                            notificationService.sendNotificationDemandeurPermutation(
-                                    new LoginFormDTO(permutation.getUtilisateur1().getEmail(),""),
-                                    permutation.getEtablissementReceveur().getLabel(),
-                                    permutation.getId(),"validée"
-                            );
+
                         }
                         if(permutation.isValidateEtabDemandeur() && permutation.isValidateEtabReceveur()){
                             if(permutation.getIefReceveur()!=null && permutation.getIefDemandeur()!=null){
@@ -610,11 +603,7 @@ public class PermutationServiceImpl implements IPermutationService {
                     permutation.setNiveau(5);
                     permutation.getEmailTraitant().add(currentUser.getEmail());
                     PermutationResponseDto permutationResponseDto = permutationMapper.toDto(iPermutationRepository.save(permutation));
-                    notificationService.sendNotificationDemandeurPermutation(
-                            new LoginFormDTO(permutation.getUtilisateur1().getEmail(),""),
-                            "le Directeur DRH",
-                            permutation.getId(),"validée"
-                    );
+
                     sendPlateformeNotification(permutation, "Chef-division-dgpeec", "CEN");
                     return permutationResponseDto;
                 }
@@ -828,9 +817,9 @@ public class PermutationServiceImpl implements IPermutationService {
             System.out.println("#### Avant save notif deconcentre"+ deconcentratedLevel1.getNom());
             Notification notification = new Notification();
             notification.setObjet("Traitement permutation");
-            notification.setMessage("Bonjour, \n une nouvelle demande de permutation vous a été transmise. \n Merci de procéder au traitement.");
+            notification.setMessage("Bonjour, \n une nouvelle demande de permutation n° " + permutation.getId() + " vous a été transmise. \n Merci de procéder au traitement.");
             notification.setIdUser(deconcentratedLevel1.getId());
-            notificationRepository.save(notification);
+            businessNotifications.notifyUser(notification);
             System.out.println("#### Apres save notif deconcentre");
         }
         }
@@ -838,10 +827,10 @@ public class PermutationServiceImpl implements IPermutationService {
         for (CentralLevel centralLevel : centralLevels){
             Notification notification = new Notification();
             notification.setObjet("Traitement permutation");
-            notification.setMessage("Bonjour, \n une nouvelle demande de permutation vous a été transmise. \n Merci de procéder au traitement.");
+            notification.setMessage("Bonjour, \n une nouvelle demande de permutation n° " + permutation.getId() + " vous a été transmise. \n Merci de procéder au traitement.");
             System.out.println("#### Avant save notif central");
             notification.setIdUser(centralLevel.getId());
-            notificationRepository.save(notification);
+            businessNotifications.notifyUser(notification);
             System.out.println("#### Apres save notif central");
         }
         }

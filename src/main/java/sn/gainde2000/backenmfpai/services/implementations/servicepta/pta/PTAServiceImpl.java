@@ -1,5 +1,7 @@
 package sn.gainde2000.backenmfpai.services.implementations.servicepta.pta;
 
+import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
+
 import com.querydsl.core.BooleanBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +51,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PTAServiceImpl implements PTAService {
+    private final BusinessNotificationService businessNotifications;
+
     private final DirectionRepository directionRepository;
 
     private final PlanDeTravailRepository planDeTravailRepository;
@@ -92,8 +97,10 @@ public class PTAServiceImpl implements PTAService {
                 .initialPTA(initailPTASaved).build();
 
         try {
-            planDeTravailRepository.save(planDeTravail);
-            return planDeTravailRepository.save(planDeTravail);
+            PlanDeTravail saved = planDeTravailRepository.save(planDeTravail);
+            businessNotifications.notify(iAuthentification.getCurrentConnectedUser(), "Création du PTA",
+                    "Le plan de travail " + initailPTASaved.getNumeroPTA() + " a été créé.");
+            return saved;
         } catch (Exception e) {
 
             throw new MFPAIException("Erreur d'enregistrement lors de creation du PTA");
@@ -191,6 +198,8 @@ public class PTAServiceImpl implements PTAService {
             planDeTravail.setActionPTAs(actionPTASS);
             planDeTravailRepository.save(planDeTravail);
 
+            businessNotifications.notify(iAuthentification.getCurrentConnectedUser(), "Création d’une action PTA",
+                    "L’action PTA " + actionSaved.getNumAction() + " a été créée.");
             return actionSaved;
         } catch (Exception e) {
             throw new MFPAIException("Erreur d'enregistrement lors de creation de l'action du PTA");
@@ -316,6 +325,8 @@ public class PTAServiceImpl implements PTAService {
             planDeTravail.setActionPTAs(actionPTASS);
             planDeTravailRepository.save(planDeTravail);
 
+            businessNotifications.notify(iAuthentification.getCurrentConnectedUser(), "Création d’une action PTA",
+                    "L’action PTA " + actionSaved.getNumAction() + " a été créée.");
             return actionSaved;
         } catch (Exception e) {
             throw new MFPAIException("Erreur d'enregistrement lors de creation de l'action du PTA");
@@ -341,7 +352,10 @@ public class PTAServiceImpl implements PTAService {
         subActionPTA.setReportRealisation(null);
 
 
-        return subActionPTARepository.save(subActionPTA);
+        SubActionPTA saved = subActionPTARepository.save(subActionPTA);
+        businessNotifications.notify(saved.getUtilisateur(), "Création d’une sous-action PTA",
+                "La sous-action PTA " + saved.getLibelleSubAction() + " a été créée.");
+        return saved;
     }
 
     @Override
@@ -487,6 +501,8 @@ public class PTAServiceImpl implements PTAService {
 
         subActionPTARepository.save(subActionPTA);
 
+        businessNotifications.notify(subActionPTA.getUtilisateur(), "Rapport de réalisation PTA",
+                "Un rapport de réalisation a été enregistré pour la sous-action " + subActionPTA.getLibelleSubAction() + ".");
         return saveReport;
     }
 
