@@ -275,7 +275,11 @@ public class PermutationServiceImpl implements IPermutationService {
                     currentUtilisateur.getProfils().stream().findAny().get().getCode().equals("bureau-mo-rec") ||
                     currentUtilisateur.getProfils().stream().findAny().get().getCode().equals("Chef-service") ||
                     currentUtilisateur.getProfils().stream().findAny().get().getCode().equals("ADMIN-DRH") ||
-                    currentUtilisateur.getProfils().stream().findAny().get().getCode().equals("Directeur-DRH")){
+                    currentUtilisateur.getProfils().stream().findAny().get().getCode().equals("Directeur-DRH") ||
+                    // debut modification aicha
+                    currentUtilisateur.getProfils().stream().findAny().get().getCode().equals("Assistant-DRH")
+                     // fin modification aicha
+                ){
                 System.out.println("\n type user "+currentUtilisateur.getProfils().stream().findAny().get().getCode());
                 builder.and(
                         permutation.isDeleted.isFalse()
