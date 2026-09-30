@@ -58,6 +58,7 @@ import sn.gainde2000.backenmfpai.repositories.serviceutilisateur.deconcentred.Re
 import sn.gainde2000.backenmfpai.services.interfaces.files.IFile;
 import sn.gainde2000.backenmfpai.services.interfaces.serviceutilisateur.INotificationService;
 import sn.gainde2000.backenmfpai.services.interfaces.serviceutilisateur.IUtilisateur;
+import sn.gainde2000.backenmfpai.services.implementations.servicecarriere.Permutation.PermutationSignatures;
 import sn.gainde2000.backenmfpai.web.dtos.requests.authentification.LoginFormDTO;
 import sn.gainde2000.backenmfpai.web.dtos.responses.Response;
 import sn.gainde2000.backenmfpai.web.dtos.responses.mails.MailInfosDTO;
@@ -942,6 +943,119 @@ public class FileImpl implements IFile {
                         fileRepository.save(file1);
                         mutation.get().getPieceJointes().add(file1);
                         imutationRepository.save(mutation.get());
+                        Files.write(path, bytes);
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return Response.exception().setMessage("Une erreur s'est produit lors de l'enregistrement du fichier");
+                    }
+                }
+                break;
+            case "permutationDemande":
+                Optional<Permutation> permutationDemande = iPermutationRepository.findById(id);
+                if (permutationDemande.isEmpty()) {
+                    return Response.exception().setMessage("Demande de permutation inexistante");
+                }
+                if (files.isEmpty()) {
+                    return Response.exception().setMessage("Veuillez selectionner un fichier");
+                }
+                // Seuls les deux agents concernés peuvent joindre leur dossier
+                String matriculeConnecte = iUtilisateur.getCurrentUser().getMatricule();
+                String partie;
+                if (matriculeConnecte.equals(permutationDemande.get().getUtilisateur1().getMatricule())) {
+                    partie = "DEMANDEUR";
+                } else if (matriculeConnecte.equals(permutationDemande.get().getUtilisateur2().getMatricule())) {
+                    partie = "RECEVEUR";
+                } else {
+                    return Response.exception().setMessage("Seuls les agents concernés par la permutation peuvent joindre un dossier");
+                }
+                if (permutationDemande.get().getPieceJointes() == null) {
+                    permutationDemande.get().setPieceJointes(new java.util.ArrayList<>());
+                }
+                for (MultipartFile file : files) {
+                    String originalFilename = file.getOriginalFilename();
+                    String extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
+                    String newFileName = UUID.randomUUID().toString() + extension;
+                    try {
+                        byte[] bytes = file.getBytes();
+                        Path path = Paths.get(uploadDirectory + newFileName);
+                        File file1 = new File();
+                        file1.setOriginalName(originalFilename);
+                        file1.setFileSize(file.getSize());
+                        file1.setFileType(file.getContentType());
+                        file1.setGeneratedName(newFileName);
+                        file1.setDownloadUrl(downloadUrl + newFileName);
+                        file1.setIdAppartenance(id);
+                        file1.setFileCode(partie);
+                        fileRepository.save(file1);
+                        permutationDemande.get().getPieceJointes().add(file1);
+                        iPermutationRepository.save(permutationDemande.get());
+                        Files.write(path, bytes);
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return Response.exception().setMessage("Une erreur s'est produit lors de l'enregistrement du fichier");
+                    }
+                }
+                break;
+            case "permutationSigne_DEMANDEUR":
+            case "permutationSigne_RECEVEUR":
+            case "permutationBordereau":
+                // Circuit de signature : chef d'établissement, IEF puis IA (voir PermutationSignatures)
+                Optional<Permutation> permutationSignee = iPermutationRepository.findById(id);
+                if (permutationSignee.isEmpty()) {
+                    return Response.exception().setMessage("Demande de permutation inexistante");
+                }
+                if (files.isEmpty()) {
+                    return Response.exception().setMessage("Veuillez selectionner un fichier");
+                }
+                // type : permutationSigne_DEMANDEUR / permutationSigne_RECEVEUR (demande signée de l'agent)
+                //        permutationBordereau (bordereau de transmission IEF / IA)
+                Utilisateur acteurConnecte = iUtilisateur.getCurrentUser();
+                String niveauActeur = PermutationSignatures.niveau(acteurConnecte.getProfils().stream().findAny().get().getCode());
+                List<String> agentsCouverts = PermutationSignatures.agentsCouverts(permutationSignee.get(),
+                        deconcentratedLevelRepository.findByMatricule(acteurConnecte.getMatricule()).orElse(null), niveauActeur);
+                boolean estBordereau = type.equals("permutationBordereau");
+                String agentSigne = estBordereau ? null : type.substring("permutationSigne_".length());
+                if (agentsCouverts.isEmpty() || (estBordereau && niveauActeur.equals("CE"))
+                        || (!estBordereau && !agentsCouverts.contains(agentSigne))) {
+                    return Response.exception().setMessage("Vous n'êtes pas habilité à signer la demande de cet agent");
+                }
+                String codeSigne = estBordereau
+                        ? PermutationSignatures.codeBordereau(niveauActeur, agentsCouverts)
+                        : PermutationSignatures.codeSigne(agentSigne, niveauActeur);
+                if (permutationSignee.get().getPieceJointes() == null) {
+                    permutationSignee.get().setPieceJointes(new java.util.ArrayList<>());
+                }
+                // la demande signée remplace la demande courante de l'agent (soumise ou signée au niveau précédent) ;
+                // un nouveau bordereau remplace celui du même acteur
+                List<File> versionsRemplacees = permutationSignee.get().getPieceJointes().stream()
+                        .filter(doc -> doc.getFileCode() != null
+                                && (estBordereau ? codeSigne.equals(doc.getFileCode()) : doc.getFileCode().startsWith(agentSigne)))
+                        .toList();
+                if (!versionsRemplacees.isEmpty()) {
+                    permutationSignee.get().getPieceJointes().removeAll(versionsRemplacees);
+                    iPermutationRepository.save(permutationSignee.get());
+                    fileRepository.deleteAll(versionsRemplacees);
+                }
+                for (MultipartFile file : files) {
+                    String originalFilename = file.getOriginalFilename();
+                    String extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
+                    String newFileName = UUID.randomUUID().toString() + extension;
+                    try {
+                        byte[] bytes = file.getBytes();
+                        Path path = Paths.get(uploadDirectory + newFileName);
+                        File file1 = new File();
+                        file1.setOriginalName(originalFilename);
+                        file1.setFileSize(file.getSize());
+                        file1.setFileType(file.getContentType());
+                        file1.setGeneratedName(newFileName);
+                        file1.setDownloadUrl(downloadUrl + newFileName);
+                        file1.setIdAppartenance(id);
+                        file1.setFileCode(codeSigne);
+                        fileRepository.save(file1);
+                        permutationSignee.get().getPieceJointes().add(file1);
+                        iPermutationRepository.save(permutationSignee.get());
                         Files.write(path, bytes);
 
                     } catch (IOException e) {

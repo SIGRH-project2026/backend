@@ -199,36 +199,9 @@ public class JasperGenerator {
                 .orElse(fallback);
     }
 
+    // OS d'une seule permutation (modèle PermutationOS.jrxml, partagé avec l'OS global)
     public  byte[] getPermutationOS(Permutation permutation) throws FileNotFoundException, JRException {
-        DeconcentratedLevel demandeur = deconcentratedLevelRepository.findByMatricule(permutation.getUtilisateur1().getMatricule()).get();
-        DeconcentratedLevel receveur = deconcentratedLevelRepository.findByMatricule(permutation.getUtilisateur2().getMatricule()).get();
-
-        PermutationReportDto ligneDemandeur = new PermutationReportDto();
-        ligneDemandeur.setMatricule(demandeur.getMatricule());
-        ligneDemandeur.setPrenoms(demandeur.getPrenom());
-        ligneDemandeur.setNom(demandeur.getNom());
-        ligneDemandeur.setSpecialite(demandeur.getSpeciality() != null ? demandeur.getSpeciality().getLabel() : "");
-        ligneDemandeur.setOrigine(permutation.getEtablissementDemandeur().getLabel());
-        ligneDemandeur.setDestination(permutation.getEtablissementReceveur().getLabel());
-        ligneDemandeur.setAcademie(permutation.getIaReceveur().getLabel());
-
-        PermutationReportDto ligneReceveur = new PermutationReportDto();
-        ligneReceveur.setMatricule(receveur.getMatricule());
-        ligneReceveur.setPrenoms(receveur.getPrenom());
-        ligneReceveur.setNom(receveur.getNom());
-        ligneReceveur.setSpecialite(receveur.getSpeciality() != null ? receveur.getSpeciality().getLabel() : "");
-        ligneReceveur.setOrigine(permutation.getEtablissementReceveur().getLabel());
-        ligneReceveur.setDestination(permutation.getEtablissementDemandeur().getLabel());
-        ligneReceveur.setAcademie(permutation.getIaDemandeur().getLabel());
-
-        File file = ResourceUtils.getFile("classpath:static/PermutationOS.jrxml");
-        JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("CollectionBeanParam", new JRBeanCollectionDataSource(List.of(ligneDemandeur, ligneReceveur)));
-        parameters.put("dateCreation", new Date());
-        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
-        return JasperExportManager.exportReportToPdf(jasperPrint);
-
+        return getPermutationAllOS(List.of(permutation));
     }
 
     public  byte[] getPermutationAllOS(List<Permutation> permutations) throws FileNotFoundException, JRException {
@@ -253,8 +226,8 @@ public class JasperGenerator {
             permutationReportDtoReceveur.setPrenoms(receveur.getPrenom());
             permutationReportDtoDemandeur.setMatricule(demandeur.getMatricule());
             permutationReportDtoReceveur.setMatricule(receveur.getMatricule());
-            permutationReportDtoDemandeur.setSpecialite(demandeur.getSpeciality().getLabel());
-            permutationReportDtoReceveur.setSpecialite(receveur.getSpeciality().getLabel());
+            permutationReportDtoDemandeur.setSpecialite(demandeur.getSpeciality() != null ? demandeur.getSpeciality().getLabel() : "");
+            permutationReportDtoReceveur.setSpecialite(receveur.getSpeciality() != null ? receveur.getSpeciality().getLabel() : "");
             // On lit l'origine / la destination / l'académie depuis les champs figés de la
             // permutation (capturés à la création) et NON depuis le compte utilisateur en direct :
             // à la validation de l'OS signé, les établissements/IA des deux agents sont échangés,
@@ -271,7 +244,8 @@ public class JasperGenerator {
             i++;
         }
 
-        File file = ResourceUtils.getFile("classpath:static/Blank_A4_Landscape.jrxml");
+        // même modèle pour l'OS global (bouton « Générer OS ») et l'OS d'une permutation
+        File file = ResourceUtils.getFile("classpath:static/PermutationOS.jrxml");
         JRBeanCollectionDataSource itemsDataBean = new JRBeanCollectionDataSource(permutationReportDtos);
         Map<String , Object> parameters = new HashMap<String , Object>();
         parameters.put("CollectionBeanParam", itemsDataBean);
