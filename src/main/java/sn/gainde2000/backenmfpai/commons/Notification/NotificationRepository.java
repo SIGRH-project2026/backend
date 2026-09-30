@@ -7,6 +7,7 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 
 public interface NotificationRepository  extends JpaRepository<Notification, Long>, QuerydslPredicateExecutor<Notification> {
-    @Query("SELECT COUNT(not) FROM Notification not WHERE not.isRead = :isRead ")
-    Long notificationsNotRead(boolean isRead);
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select n from Notification n where n.id = :id")
+    java.util.Optional<Notification> findForReading(@Param("id") Long id);
 }

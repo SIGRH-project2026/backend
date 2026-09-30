@@ -7,7 +7,10 @@ import sn.gainde2000.backenmfpai.entities.servicecarriere.MutationPermutation.St
 import sn.gainde2000.backenmfpai.entities.servicecarriere.MutationPermutation.TraitementPermutation;
 import sn.gainde2000.backenmfpai.entities.serviceutilisateur.Utilisateur;
 
+import sn.gainde2000.backenmfpai.entities.file.File;
+
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -27,5 +30,6 @@ public class PermutationResponseDto {
     private Boolean isActive;
     private TraitementPermutation traitementPermutation;
     private String ordreService;
+    private List<File> pieceJointes;
 
 }

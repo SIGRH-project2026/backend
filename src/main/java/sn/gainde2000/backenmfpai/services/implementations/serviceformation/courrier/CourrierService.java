@@ -2,6 +2,7 @@ package sn.gainde2000.backenmfpai.services.implementations.serviceformation.cour
 
 import com.querydsl.core.BooleanBuilder;
 import lombok.RequiredArgsConstructor;
+import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,7 +29,10 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CourrierService implements ICourrier {
+    private final BusinessNotificationService businessNotifications;
+
     private final CourrierRepository courrierRepository;
     private final DirectionRepository directionRepository;
     private final DivisionRepository divisionRepository;
@@ -110,6 +114,8 @@ public class CourrierService implements ICourrier {
         TraitementCourrier traitementCourrier = new TraitementCourrier();
 
         Courrier savedCourrier = courrierRepository.save(courrier);
+        businessNotifications.notify(iUtilisateur.getCurrentUser(), "Création de votre courrier",
+                "Votre courrier n° " + savedCourrier.getReference() + " a été enregistré.");
         traitementCourrier.setCourrier(savedCourrier);
         traitementCourrier.setStatutCourrier(statutCourrierRepository.findByCode("NONTRAITER").get());
         traitementCourrier.setActivated(true);
@@ -119,8 +125,8 @@ public class CourrierService implements ICourrier {
         if (courrierRequest.getCodeDemandeCourrier().equals("STAGE")) {
             for (CentralLevel centralLevel : centralLevels
             ) {
-                if (centralLevel.getProfils().contains("Chef-division-dfc") || centralLevel.getProfils().contains("Chef-bureau-dfc") || centralLevel.getProfils().contains("Agent-bureau-dfc"))
-                    mailService.sendMail(new MailInfosDTO(null, "Bonjour " + centralLevel.getPrenom() + " " + centralLevel.getNom() + "\n,Le courier " + courrierRequest.getReference() + " vous a été imputé", "Nouveau Courrier", null, centralLevel.getEmail()));
+                if (centralLevel.getProfils().stream().anyMatch(p -> java.util.Set.of("Chef-division-dfc", "Chef-bureau-dfc", "Agent-bureau-dfc").contains(p.getCode())))
+                    businessNotifications.notify(centralLevel, "Nouveau Courrier", "Bonjour " + centralLevel.getPrenom() + " " + centralLevel.getNom() + "\n,Le courier " + courrierRequest.getReference() + " vous a été imputé");
 
             }
         }
@@ -254,6 +260,9 @@ public class CourrierService implements ICourrier {
                 return Response.exception().setMessage("Vous n'êtes pas autorisé à effectuer cette action");
         } else if (!canTraiterCourrier(optionalCentralLevel.get(),optionalCourrier.get()))
             return Response.exception().setMessage("Vous n'êtes pas autorisé à effectuer cette action");
+        if ("TRAITER".equals(optionalCourrier.get().getStatut())) {
+            return Response.ok().setMessage("Ce courrier a déjà été traité.");
+        }
         optionalCourrier.get().setStatut("TRAITER");
         courrierRepository.save(optionalCourrier.get());
         List<TraitementCourrier> traitementCourriers = traitementCourrierRepository.findAll();
@@ -270,6 +279,8 @@ public class CourrierService implements ICourrier {
         newTraitementCourrier.setActivated(true);
         newTraitementCourrier.setUtilisateur(iUtilisateur.getCurrentUser());
         traitementCourrierRepository.save(newTraitementCourrier);
+        businessNotifications.notify(optionalCourrier.get().getCentralLevel(), "Traitement de votre courrier",
+                "Votre courrier n° " + optionalCourrier.get().getReference() + " a été traité.");
 
         return Response.ok().setMessage("Courrier Traité.");
     }

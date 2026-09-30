@@ -1,5 +1,9 @@
 package sn.gainde2000.backenmfpai.services.implementations.serviceformation.formation;
 
+import org.springframework.transaction.annotation.Transactional;
+
+import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
+
 import sn.gainde2000.backenmfpai.entities.serviceformation.formation.Formation;
 import sn.gainde2000.backenmfpai.entities.serviceformation.formation.ParticipantDefinitif;
 import sn.gainde2000.backenmfpai.entities.serviceformation.formation.TableauSuivi;
@@ -21,7 +25,10 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ParticipantDefinitifServiceImpl implements IParticipantDefinitifService {
+    private final BusinessNotificationService businessNotifications;
+
 
     private final ParticipantDefinitifRepository tableauSuiviRepository;
     private final FormationRepository formationRepository;
@@ -58,6 +65,8 @@ public class ParticipantDefinitifServiceImpl implements IParticipantDefinitifSer
 
         ParticipantDefinitif savedTableauSuivi = tableauSuiviRepository.save(participantDefinitif);
 
+        businessNotifications.notifyMatricule(savedTableauSuivi.getMatricule(), "Participation à une formation",
+                "Votre inscription définitive à la formation " + formation.getReference() + " a été enregistrée.");
         return mapToDTO(savedTableauSuivi);
     }
 
@@ -107,6 +116,7 @@ public class ParticipantDefinitifServiceImpl implements IParticipantDefinitifSer
         Optional<ParticipantDefinitif> participantOptional = tableauSuiviRepository.findById(id);
         if (participantOptional.isPresent()) {
             ParticipantDefinitif participant = participantOptional.get();
+            boolean wasAdmis = participant.isAdmis();
 
             if (participantDefinitifDTO.getNom() != null) {
                 participant.setNom(participantDefinitifDTO.getNom());
@@ -129,6 +139,11 @@ public class ParticipantDefinitifServiceImpl implements IParticipantDefinitifSer
 
             ParticipantDefinitif updatedParticipant = tableauSuiviRepository.save(participant);
 
+            if (wasAdmis != updatedParticipant.isAdmis()) {
+                businessNotifications.notifyMatricule(updatedParticipant.getMatricule(), "Résultat de formation",
+                        "Formation " + updatedParticipant.getFormation().getReference() + " : "
+                                + (updatedParticipant.isAdmis() ? "admis" : "non admis") + ".");
+            }
             return mapToDTO(updatedParticipant);
         } else {
             throw new EntityNotFoundException("ParticipantDefinitif not found");

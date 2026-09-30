@@ -9,6 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import sn.gainde2000.backenmfpai.commons.Notification.INotification;
+import sn.gainde2000.backenmfpai.commons.Notification.Notification;
 import sn.gainde2000.backenmfpai.entities.servicecarriere.Actes.TypeAA;
 import sn.gainde2000.backenmfpai.entities.servicecarriere.Actes.TypeAG;
 import sn.gainde2000.backenmfpai.entities.servicecarriere.Actes.TypeActe;
@@ -23,6 +25,7 @@ import sn.gainde2000.backenmfpai.repositories.serviceutilisateur.IUtilisateurRep
 import sn.gainde2000.backenmfpai.repositories.serviceutilisateur.deconcentred.DeconcentratedLevelRepository;
 import sn.gainde2000.backenmfpai.services.interfaces.servicecarriere.IDossierAgent;
 import sn.gainde2000.backenmfpai.services.interfaces.serviceutilisateur.IUtilisateur;
+import sn.gainde2000.backenmfpai.services.interfaces.serviceutilisateur.INotificationService;
 import sn.gainde2000.backenmfpai.web.dtos.requests.servicecarriere.DossierAgentRequestDto;
 import sn.gainde2000.backenmfpai.web.dtos.responses.servicecarriere.DossierAgentResponseDto;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +62,8 @@ public class DossierAgentImpl implements IDossierAgent {
     private final TypeActeRepository typeActeRepository;
     private final TypeAARepository typeAARepository;
     private final TypeAGRepository typeAGRepository;
+    private final INotification notificationService;
+    private final INotificationService emailNotificationService;
 
     @Override
     public DossierAgentResponseDto rechercheDossierAgent(String matricule) {
@@ -169,7 +174,18 @@ public class DossierAgentImpl implements IDossierAgent {
         }
 
         dossierAgent.setSituationAdministrative(listSituation);
-        return dossierAgentRepository.save(dossierAgent);
+        DossierAgent savedDossier = dossierAgentRepository.save(dossierAgent);
+        notifyDossierCreated(utilisateur);
+        return savedDossier;
+    }
+
+    private void notifyDossierCreated(Utilisateur utilisateur) {
+        notificationService.notifyUser(Notification.builder()
+                .idUser(utilisateur.getId())
+                .objet("Création de votre dossier agent")
+                .message("Votre dossier agent a été créé. Vous pouvez le consulter dans votre espace personnel.")
+                .build());
+        emailNotificationService.sendNotificationDossierCreated(utilisateur.getEmail());
     }
 
     private DossierAgent updateExistingDossier(DossierAgentRequestDto dto,
@@ -399,6 +415,7 @@ public class DossierAgentImpl implements IDossierAgent {
         newDossier.setActes(new ArrayList<>());
 
         DossierAgent savedDossier = dossierAgentRepository.save(newDossier);
+        notifyDossierCreated(user);
         return dossierAgentMapper.toDto(savedDossier);
     }
 }

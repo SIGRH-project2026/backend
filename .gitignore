@@ -57,3 +57,9 @@ src/main/resources/application-*.yml
 
 # Temporary / generated files
 tmp/
+!src/main/resources/application-env.yaml
+storage/
+
+*.log
+hs_err_pid*.log
+replay_pid*.log

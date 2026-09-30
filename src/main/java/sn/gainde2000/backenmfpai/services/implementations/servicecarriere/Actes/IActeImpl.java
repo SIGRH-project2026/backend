@@ -6,6 +6,7 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.NumberPath;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.JRException;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,7 +68,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Transactional
 public class IActeImpl implements IActe {
+    private final BusinessNotificationService businessNotifications;
+
     private final ActeMapper acteMapper;
     private final PieceJointesMapper pieceJointesMapper;
     private final ActeRepository acteRepository;
@@ -185,16 +189,13 @@ public class IActeImpl implements IActe {
         Acte savedActe = acteRepository.saveAndFlush(acte);
         traitementActe.setActe(savedActe);
         traitementActeRepository.save(traitementActe);
-        List<String> profilesTraiteurs = new ArrayList<>();
-        profilesTraiteurs.add("Chef-division");
-        List<Utilisateur> usersTraiteurs = utilisateurRepository.findByProfileCodes(profilesTraiteurs);
-        for (Utilisateur u : usersTraiteurs) {
-            mailService.sendMail(new MailInfosDTO(null, "Bonjour " + u.getPrenom() + " " + u.getNom() + "\nLa demande d'acte N°" + acte.getReferenceActe() + "vous a été soumise.\nMerci de procéder au traitement.", "Demande d'acte", null, u.getEmail()));
-        }
+        businessNotifications.notify(agent, "Création de votre demande d'acte",
+                "Votre demande d'acte n° " + savedActe.getReferenceActe() + " a été enregistrée.");
         return Response.ok()
                 .setPayload(acteMapper.toDto(savedActe))
                 .setMessage("Création acte avec Succés");
         } catch(Exception e){
+            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             log.error("------------------Erreur lors de la création de l'acte------------------------", e);
             return Response
                     .exception()
@@ -604,7 +605,7 @@ public class IActeImpl implements IActe {
                 //System.out.println("Hello  Modifions");
                 existingActe.setMotifModification(motifModification);
                 statutActe=statutActeRepository.findByCode("AMODIFIER").get();
-                mailService.sendMail(new MailInfosDTO(null, "Bonjour " + agent.getPrenom() + " " + agent.getNom() + "\n votre demande d'acte N° " + existingActe.getReferenceActe() + " vous a été renvoyée pour modification.\nMerci de procéder au traitement.", "Demande d'acte", null, agent.getEmail()));
+                businessNotifications.notify(agent, "Demande d'acte", "Bonjour " + agent.getPrenom() + " " + agent.getNom() + "\n votre demande d'acte N° " + existingActe.getReferenceActe() + " vous a été renvoyée pour modification.\nMerci de procéder au traitement.");
 
                 break;
             }
@@ -652,8 +653,7 @@ public class IActeImpl implements IActe {
                 System.out.println("recçueDRH");
                 statutActe = statutActeRepository.findByCode("RECU-DRH").get();
                 message="Votre demande a été reçue par le Directeur DRH";
-                mailService.sendMail(new MailInfosDTO(null, message
-                        , "Traitement demande", null, agent.getEmail()));
+                businessNotifications.notify(agent, "Traitement demande", message);
                 break;
             }
             case "encoursDCCAA": {
@@ -661,13 +661,16 @@ public class IActeImpl implements IActe {
                 System.out.println("recçueDRH");
                 statutActe = statutActeRepository.findByCode("ENCOURSDGCAA").get();
                 message="Votre demande est en cours de traitement au niveau de la DGCAA";
-                mailService.sendMail(new MailInfosDTO(null, message
-                        , "Traitement demande", null, agent.getEmail()));
+                businessNotifications.notify(agent, "Traitement demande", message);
                 break;
             }
             default:{}
         }
             System.out.println("Statut Sortant: "+statutActe.getLibelle());
+            if ("rejeter".equals(traitement)) {
+                businessNotifications.notify(existingActe.getAgent(), "Rejet de votre demande d'acte",
+                        "Votre demande d'acte n° " + existingActe.getReferenceActe() + " a été rejetée.");
+            }
             existingActe.setStatutActe(statutActe);
             Acte savedActe = acteRepository.saveAndFlush(existingActe);
             traitementActe.setActe(savedActe);
@@ -677,6 +680,7 @@ public class IActeImpl implements IActe {
                 .setPayload(acteMapper.toDto(savedActe).getStatutActe().getLibelle())
                 .setMessage("Modification acte effetuee avec succes");
         } catch (Exception e) {
+            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             log.error("------------------Une erreur est survenue lors de la mise a jour de l'acte------------------------ : {}", e.getMessage());
             return Response
                     .exception()
@@ -745,9 +749,9 @@ public class IActeImpl implements IActe {
                 long differenceEnMois = calculerDifferenceMois(acte.getDateFin(),LocalDate.now());
                 System.out.println(differenceEnMois);
                 if (differenceEnMois == 1 || differenceEnMois == 2 || differenceEnMois == 3) {
-                    mailService.sendMail(new MailInfosDTO(null, "Bonjour " + acte.getAgent().getPrenom() + " " + acte.getAgent().getNom() +
+                    businessNotifications.notify(acte.getAgent(), "Alerte fin de sortie", "Bonjour " + acte.getAgent().getPrenom() + " " + acte.getAgent().getNom() +
                             "\nLa date de votre retour est prévue dans: " + differenceEnMois +
-                            "\nMerci de bien vouloir prendre vos dispositions", "Alerte fin de sortie", null, acte.getAgent().getEmail()));
+                            "\nMerci de bien vouloir prendre vos dispositions");
                 }
                 System.out.println("date non encore atteine");
             }
@@ -829,8 +833,7 @@ public class IActeImpl implements IActe {
             default:{}
         }
 
-        mailService.sendMail(new MailInfosDTO(null, message
-                , "Traitement demande", null, agent.getEmail()));
+        businessNotifications.notify(agent, "Traitement demande", message);
         //set le profile traitant
         String profilTraitant = profilTraitant(agent, agent.getTypeUser());
 
@@ -849,6 +852,7 @@ public class IActeImpl implements IActe {
                 .setPayload(acteMapper.toDto(savedActe))
                 .setMessage("Modification acte effetuee avec succes");
         }catch (Exception e) {
+            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 log.error("------------------Une erreur est survenue lors de la mise a jour de l'acte------------------------ : {}", e.getMessage());
                 return Response
                         .exception()
@@ -1334,21 +1338,21 @@ public class IActeImpl implements IActe {
                     break;
             }
         }
-        if(userType.equals("DEC")){
+        if(!deconcentratedLevel.isEmpty()){
             for (DeconcentratedLevel deconcentratedLevel1 : deconcentratedLevel){
                 notification.setIdUser(deconcentratedLevel1.getId());
                // notificationRepository.save(notification);
-                iNotification.notifyUser(notification);
+                businessNotifications.notifyUser(notification);
                 Set<String>  emails = acte.getEmailsTraitant();
                 emails.add(deconcentratedLevel.get(0).getEmail());
                 acte.setEmailsTraitant(emails);
                 acteRepository.save(acte);
             }}
-        if(userType.equals("CEN")){
+        if(!centralLevels.isEmpty()){
             for (CentralLevel centralLevel : centralLevels){
                 notification.setIdUser(centralLevel.getId());
                // notificationRepository.save(notification);
-                iNotification.notifyUser(notification);
+                businessNotifications.notifyUser(notification);
                 Set<String>  emails = acte.getEmailsTraitant();
                 emails.add(centralLevels.get(0).getEmail());
                 acte.setEmailsTraitant(emails);

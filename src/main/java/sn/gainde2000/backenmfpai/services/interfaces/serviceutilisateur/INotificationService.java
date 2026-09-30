@@ -9,6 +9,8 @@ import sn.gainde2000.backenmfpai.web.dtos.responses.mails.MailInfosDTO;
  */
 
 public interface INotificationService {
+   void sendNotificationDossierCreated(String email);
+
    void sendNotificationToNewUserRegistred(LoginFormDTO loginFormDTO, String action);
 
    /**
