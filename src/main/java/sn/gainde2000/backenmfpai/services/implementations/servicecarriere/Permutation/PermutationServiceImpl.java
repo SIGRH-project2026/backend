@@ -275,7 +275,8 @@ public class PermutationServiceImpl implements IPermutationService {
                     currentUtilisateur.getProfils().stream().findAny().get().getCode().equals("bureau-mo-rec") ||
                     currentUtilisateur.getProfils().stream().findAny().get().getCode().equals("Chef-service") ||
                     currentUtilisateur.getProfils().stream().findAny().get().getCode().equals("ADMIN-DRH") ||
-                    currentUtilisateur.getProfils().stream().findAny().get().getCode().equals("Directeur-DRH")){
+                    currentUtilisateur.getProfils().stream().findAny().get().getCode().equals("Directeur-DRH") ||
+                    currentUtilisateur.getProfils().stream().findAny().get().getCode().equals("Assistant-DRH")){
                 System.out.println("\n type user "+currentUtilisateur.getProfils().stream().findAny().get().getCode());
                 builder.and(
                         permutation.isDeleted.isFalse()
@@ -353,6 +354,11 @@ public class PermutationServiceImpl implements IPermutationService {
                 Permutation permutation = optionalPermutation.get();
                 if (action.equals("ACCEPTER")) {
                     System.out.println("\n ##### Accepter \n");
+                    // le second agent doit avoir joint son dossier avant d'accepter
+                    boolean dossierReceveurJoint = permutation.getPieceJointes() != null && permutation.getPieceJointes().stream()
+                            .anyMatch(file -> file.getFileCode() != null && file.getFileCode().startsWith("RECEVEUR"));
+                    if (!dossierReceveurJoint)
+                        throw new IllegalArgumentException("Veuillez joindre votre dossier avant d'accepter la permutation");
                     status = iStatusPermutationRepository.findByCode("TRANSMISE_CE");
                     TraitementPermutation traitementPermutationSaved = this.saveTraitement("demande de permutation Acceptée", id, currentUser, status);
                     permutation.setTraitementPermutation(traitementPermutationSaved);
@@ -418,6 +424,7 @@ public class PermutationServiceImpl implements IPermutationService {
                     Permutation permutationSaved = iPermutationRepository.save(permutation);
                     return permutationMapper.toDto(permutationSaved);
                 } else if (action.equals("TRAITEE")) {
+                    verifierStatut(permutation, "TRAITEMENT");
                     status = iStatusPermutationRepository.findByCode("TRAITEE");
                     TraitementPermutation traitementPermutationSaved = this.saveTraitement(motif, id, currentUser, status);
                     permutation.setTraitementPermutation(traitementPermutationSaved);
@@ -434,6 +441,7 @@ public class PermutationServiceImpl implements IPermutationService {
                 Permutation permutation = optionalPermutation.get();
                 if (action.equals("VALIDER")){
                     System.out.println("\n Valider");
+                    verifierDemandesSignees(permutation, currentUser, "IA");
                         System.out.println("\n VALIDER type recu");
                         StatusPermutation statusIaReceveur = iStatusPermutationRepository.findByCode("TRANSMISE_IA");
                         TraitementPermutation traitementPermutationSaved = this.saveTraitement(motif, id, currentUser, statusIaReceveur);
@@ -490,6 +498,7 @@ public class PermutationServiceImpl implements IPermutationService {
                 Permutation permutation = optionalPermutation.get();
                 if (action.equals("VALIDER")){
                     System.out.println("\n #### validation ####");
+                    verifierDemandesSignees(permutation, currentUser, "IEF");
                     StatusPermutation statusIef = iStatusPermutationRepository.findByCode("TRANSMISE_IEF");
                     TraitementPermutation traitementPermutationSaved = this.saveTraitement(motif, id, currentUser, statusIef);
                     permutation.getEmailTraitant().add(currentUser.getEmail());
@@ -548,6 +557,8 @@ public class PermutationServiceImpl implements IPermutationService {
                 Permutation permutation = optionalPermutation.get();
                 if (action.equals("VALIDER")){
                     System.out.println("\n #### validation ####");
+                    // le chef approuve en chargeant la demande de son agent signée (à la place du bordereau)
+                    verifierDemandesSignees(permutation, currentUser, "CE");
                     StatusPermutation statusChef = iStatusPermutationRepository.findByCode("TRANSMISE_CE");
                         TraitementPermutation traitementPermutationSaved = this.saveTraitement(motif, id, currentUser, statusChef);
                         permutation.setTraitementPermutation(traitementPermutationSaved);
@@ -594,12 +605,15 @@ public class PermutationServiceImpl implements IPermutationService {
             }else{
                 throw new EntityNotFoundException("demande de permutation introuvable");
             }
-        }else if(currentUser.getProfils().stream().findAny().get().getCode().equals("Directeur-DRH")){
+        }else if(currentUser.getProfils().stream().findAny().get().getCode().equals("Directeur-DRH") ||
+                currentUser.getProfils().stream().findAny().get().getCode().equals("Assistant-DRH")){
             Optional<Permutation> optionalPermutation = iPermutationRepository.findById(id);
             if (optionalPermutation.isPresent()){
                 Permutation permutation = optionalPermutation.get();
-                if (action.equals("VALIDER")){
-                    System.out.println("\n #### validation DRH ####");
+                // la DRH accuse réception de la demande (plus de traitement ni de bordereau) et la ventile à la DGPEEC
+                if (action.equals("RECU_DRH") || action.equals("VALIDER")){
+                    System.out.println("\n #### reçu DRH ####");
+                    verifierStatut(permutation, "TRANSMISE_DRH");
                     StatusPermutation statusDRH = iStatusPermutationRepository.findByCode("TRAITEMENT");
                     TraitementPermutation traitementPermutationSaved = this.saveTraitement(motif, id, currentUser, statusDRH);
                     permutation.setTraitementPermutation(traitementPermutationSaved);
@@ -608,8 +622,8 @@ public class PermutationServiceImpl implements IPermutationService {
                     PermutationResponseDto permutationResponseDto = permutationMapper.toDto(iPermutationRepository.save(permutation));
                     notificationService.sendNotificationDemandeurPermutation(
                             new LoginFormDTO(permutation.getUtilisateur1().getEmail(),""),
-                            "le Directeur DRH",
-                            permutation.getId(),"validée"
+                            "la DRH",
+                            permutation.getId(),"reçue et transmise à la DGPEEC pour traitement"
                     );
                     sendPlateformeNotification(permutation, "Chef-division-dgpeec", "CEN");
                     return permutationResponseDto;
@@ -679,6 +693,12 @@ public class PermutationServiceImpl implements IPermutationService {
                 if (file.isEmpty()) {
                     System.out.println("+++++ FICHIER VIDE=====");
                     return Response.exception().setMessage("Veuillez selectionner un fichier");
+                }
+                // l'OS signé est chargé après traitement DGPEEC et téléchargement de l'OS généré
+                String statutActuel = permutation.getTraitementPermutation() != null && permutation.getTraitementPermutation().getStatut() != null
+                        ? permutation.getTraitementPermutation().getStatut().getCode() : null;
+                if (!"TRAITEE".equals(statutActuel) || permutation.getOrdreService() == null) {
+                    return Response.exception().setMessage("Veuillez d'abord télécharger l'ordre de service à signer");
                 }
                 Object result = fileImpl.uploadPermutationOs(file,permutation,utilisateur);
 
@@ -766,6 +786,33 @@ public class PermutationServiceImpl implements IPermutationService {
         indicateursPermutations.setRejected(reject);
         indicateursPermutations.setAll(all);
         return Response.ok().setMessage("Indicateurs permutations").setPayload(indicateursPermutations);
+    }
+
+    private void verifierStatut(Permutation permutation, String statutAttendu) {
+        String statutActuel = permutation.getTraitementPermutation() != null && permutation.getTraitementPermutation().getStatut() != null
+                ? permutation.getTraitementPermutation().getStatut().getCode() : null;
+        if (!statutAttendu.equals(statutActuel))
+            throw new IllegalArgumentException("Action impossible : la demande n'est pas au statut attendu");
+    }
+
+    /**
+     * Chef d'établissement, IEF et IA valident en rechargeant, signée, la demande de chacun de leurs agents ;
+     * l'IEF et l'IA y joignent un bordereau de transmission.
+     */
+    private void verifierDemandesSignees(Permutation permutation, Utilisateur acteur, String niveau) {
+        DeconcentratedLevel acteurDec = deconcentratedLevelRepository.findByMatricule(acteur.getMatricule()).orElse(null);
+        List<String> agents = PermutationSignatures.agentsCouverts(permutation, acteurDec, niveau);
+        for (String agent : agents) {
+            if (!PermutationSignatures.estSignee(permutation, agent, niveau))
+                throw new IllegalArgumentException("Veuillez charger la demande signée de votre agent avant de valider");
+        }
+        if (!niveau.equals("CE") && !agents.isEmpty()) {
+            String codeBordereau = PermutationSignatures.codeBordereau(niveau, agents);
+            boolean bordereauCharge = permutation.getPieceJointes() != null && permutation.getPieceJointes().stream()
+                    .anyMatch(file -> codeBordereau.equals(file.getFileCode()));
+            if (!bordereauCharge)
+                throw new IllegalArgumentException("Veuillez charger le bordereau de transmission avant de valider");
+        }
     }
 
     // gestion des notification dans la plateforme

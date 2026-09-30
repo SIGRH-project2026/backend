@@ -3,6 +3,7 @@ package sn.gainde2000.backenmfpai.entities.servicecarriere.MutationPermutation;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import sn.gainde2000.backenmfpai.entities.file.File;
 import sn.gainde2000.backenmfpai.entities.serviceutilisateur.Utilisateur;
 import sn.gainde2000.backenmfpai.entities.serviceutilisateur.deconcentred.DeconcentratedLevel;
 import sn.gainde2000.backenmfpai.entities.serviceutilisateur.deconcentred.Etablissement;
@@ -105,5 +106,10 @@ public class Permutation {
 
     @Column(name ="permu_email_traitant")
     private List<String> emailTraitant = new ArrayList<>();
+
+    // Dossiers joints par les deux agents ; File.fileCode vaut DEMANDEUR ou RECEVEUR
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "permutation_id")
+    private List<File> pieceJointes = new ArrayList<>();
 
 }
