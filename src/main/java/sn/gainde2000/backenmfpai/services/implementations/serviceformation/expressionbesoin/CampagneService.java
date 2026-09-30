@@ -1,5 +1,7 @@
 package sn.gainde2000.backenmfpai.services.implementations.serviceformation.expressionbesoin;
 
+import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
+
 import com.querydsl.core.BooleanBuilder;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +48,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class CampagneService implements ICampagne {
+    private final BusinessNotificationService businessNotifications;
+
     private final CampagneRepository campagneRepository;
     private final CampagneMapper campagneMapper;
     private final CentralLevelRepository centralLevelRepository;
@@ -88,6 +92,8 @@ public class CampagneService implements ICampagne {
         campagne.setCentralLevel(centralLevelRepository.findByEmail(iUtilisateur.getCurrentUser().getEmail()).orElse(null));
         Campagne campagne_ = campagneRepository.save(campagne);
         saveTraitement(campagne_, StatutCampagneEnum.NEW_CAMPAGNE);
+        businessNotifications.notify(campagne_.getCentralLevel(), "Suivi de campagne",
+                "La campagne n° " + campagne_.getId() + " a été créée.");
         return Response.ok().setMessage("Campagne créer avec succès.").setPayload(campagneMapper.mapToCampagneResponseDTO(campagne_));
     }
 
@@ -289,6 +295,8 @@ public class CampagneService implements ICampagne {
         campagne.setStatut(StatutCampagneEnum.STARTED_CAMPAGNE.name());
         Campagne campagne_ = campagneRepository.save(campagne);
         saveTraitement(campagne_, StatutCampagneEnum.STARTED_CAMPAGNE);
+        businessNotifications.notify(campagne_.getCentralLevel(), "Suivi de campagne",
+                "La campagne n° " + campagne_.getId() + " a été démarrée.");
         return Response.ok().setMessage("Campagne demarrer avec succès.");
     }
 
@@ -338,6 +346,8 @@ public class CampagneService implements ICampagne {
         campagne.setStatut(StatutCampagneEnum.ENDED_CAMPAGNE.name());
         Campagne campagne_ = campagneRepository.save(campagne);
         saveTraitement(campagne_, StatutCampagneEnum.ENDED_CAMPAGNE);
+        businessNotifications.notify(campagne_.getCentralLevel(), "Suivi de campagne",
+                "La campagne n° " + campagne_.getId() + " a été clôturée.");
         return Response.ok().setMessage("Campagne clôturée avec succès.");
     }
 

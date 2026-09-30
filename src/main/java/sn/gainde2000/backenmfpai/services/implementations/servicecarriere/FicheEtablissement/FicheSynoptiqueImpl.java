@@ -1,5 +1,7 @@
 package sn.gainde2000.backenmfpai.services.implementations.servicecarriere.FicheEtablissement;
 
+import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
+
 import com.querydsl.core.BooleanBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +33,7 @@ import java.util.*;
 @Slf4j
 @RequiredArgsConstructor
 public class FicheSynoptiqueImpl implements IFicheSynoptique {
+    private final BusinessNotificationService businessNotifications;
     private final IUtilisateurRepository iUtilisateurRepository;
     private final IFicheSynoptiqueRepository iFicheSynoptiqueRepository;
     private final IFicheSynoptiqueMapper iFicheSynoptiqueMapper;
@@ -52,10 +55,14 @@ public class FicheSynoptiqueImpl implements IFicheSynoptique {
 
             ficheSynoptique = this.iFicheSynoptiqueRepository.save(ficheSynoptique);
 
+            businessNotifications.notify(chefEtablissement, "Création de la fiche d'établissement",
+                    "La fiche synoptique de votre établissement a été créée.");
+
             return Response.ok()
                     .setMessage("Fiche Synoptique créée . ")
                     .setPayload(this.iFicheSynoptiqueMapper.toDto(ficheSynoptique));
         } catch (Exception e) {
+            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return Response.exception()
                     .setMessage("Une erreur s'est produite lors de la création de fiche synoptique.");
         }

@@ -1,5 +1,7 @@
 package sn.gainde2000.backenmfpai.services.implementations.serviceformation.planformation;
 
+import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
+
 import lombok.RequiredArgsConstructor;
 
 import java.util.*;
@@ -33,7 +35,10 @@ import sn.gainde2000.backenmfpai.web.dtos.requests.serviceformation.planformatio
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ThemeFormationServiceImpl implements IThemeFormationService {
+    private final BusinessNotificationService businessNotifications;
+
 
     private final ThemeFormationRepository themeFormationRepository;
     private final sn.gainde2000.backenmfpai.mappers.serviceformation.planformation.ThemeFormationMapper themeFormationMapper;
@@ -80,6 +85,8 @@ public class ThemeFormationServiceImpl implements IThemeFormationService {
 
             // Enregistrer le thème de formation dans la base de données
             ThemeFormation savedEntity = themeFormationRepository.save(entity);
+            businessNotifications.notify(savedEntity.getResponsableSuivi(), "Affectation du suivi de formation",
+                    "Le suivi du thème de formation " + savedEntity.getLibelle() + " vous a été confié.");
 
             // Mapper l'entité sauvegardée vers un DTO et le retourner
             return themeFormationMapper.toDTO(savedEntity);

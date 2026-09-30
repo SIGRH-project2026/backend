@@ -1,6 +1,8 @@
 
 package sn.gainde2000.backenmfpai.services.implementations.servicecarriere.BesoinEnPersonnel;
 
+import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
+
 import com.querydsl.core.BooleanBuilder;
 
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,8 @@ import java.util.Objects;
 @Slf4j
 @RequiredArgsConstructor
 public class BesoinEnPersonnelImpl implements IBesoinEnPersonnel {
+    private final BusinessNotificationService businessNotifications;
+
     private final BesoinEnPersonnelRepository besoinEnPersonnelRepository;
     private final BesoinEnPersonnelMapper besoinEnPersonnelMapper;
     private final StatutBEPRepository statutBEPRepository;
@@ -62,10 +66,13 @@ public class BesoinEnPersonnelImpl implements IBesoinEnPersonnel {
 
             utilisateur.getBesoinsEnPersonnel().add(besoinEnPersonnel);
             iUtilisateurRepository.save(utilisateur);
+            businessNotifications.notify(utilisateur, "Besoin en personnel",
+                    "Votre besoin en personnel n° " + besoinEnPersonnel.getId() + " a été enregistré.");
             return Response.ok()
                     .setMessage("Besoin en personnel soumis. ")
                     .setPayload(this.besoinEnPersonnelMapper.toDto(besoinEnPersonnel));
        } catch (Exception e) {
+            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return Response.exception()
                     .setMessage("Une erreur s'est produite lors de la soumission du BEP.");
         }

@@ -37,11 +37,17 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
         try {
             String jwt = AuthUtils.getJwt(request);
 
-            if (jwt != null && tokenProvider.validationJwtToken(jwt)) {
+            if (jwt != null && tokenProvider.validationAccessToken(jwt)) {
 
                 String userName = tokenProvider.getUserNameFromJwtToken(jwt);
                 UserDetails userDetails = utilisateurDetailsSercive.loadUserByUsername(userName);
 
+                if (!userDetails.isEnabled() || !userDetails.isAccountNonLocked()
+                        || !userDetails.isAccountNonExpired() || !userDetails.isCredentialsNonExpired()) {
+                    SecurityContextHolder.clearContext();
+                    filterChain.doFilter(request, response);
+                    return;
+                }
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities()
                 );
@@ -51,7 +57,8 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
             }
 
         } catch (Exception e) {
-            LOGGER.log(Level.valueOf("context"), e);
+            SecurityContextHolder.clearContext();
+            LOGGER.debug("Bearer authentication rejected");
         }
 
         filterChain.doFilter(request, response);

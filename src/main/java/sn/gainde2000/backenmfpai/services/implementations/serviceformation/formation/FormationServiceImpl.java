@@ -1,5 +1,7 @@
 package sn.gainde2000.backenmfpai.services.implementations.serviceformation.formation;
 
+import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -44,7 +46,12 @@ import sn.gainde2000.backenmfpai.web.dtos.responses.Response;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class FormationServiceImpl implements IFormationService {
+    private final BusinessNotificationService businessNotifications;
+
+    private final FormationNotifications formationNotifications;
+
         private final FormationRepository formationRepository;
         private final ThemeFormationRepository themeFormationRepository;
         private final StatutFormationRepository statutFormationRepository;
@@ -212,7 +219,11 @@ public class FormationServiceImpl implements IFormationService {
                         formation.setCahierCharge(uploadedFile);
                 }
 
-                return formationRepository.save(formation);
+                Formation saved = formationRepository.save(formation);
+                formationNotifications.notifyConcerned(saved, "création enregistrée");
+                businessNotifications.notify(iUtilisateur.getCurrentUser(), "Suivi de formation",
+                        "Formation " + saved.getReference() + " : création enregistrée.");
+                return saved;
         }
 
         @Override
@@ -309,6 +320,7 @@ public class FormationServiceImpl implements IFormationService {
                                 .orElseThrow(() -> new EntityNotFoundException(
                                                 "Formation introuvable avec l'ID : " + formationId));
 
+                String previousStatus = formation.getStatutFormation() == null ? null : formation.getStatutFormation().getCode();
                 formation.setTypeFormation(
                                 typeFormationRepository.findByCode(formationDTO.getTypeFormation().getCode()));
 
@@ -337,6 +349,9 @@ public class FormationServiceImpl implements IFormationService {
                                 statutFormationRepository.findByCode(formationDTO.getStatutFormation().getCode()));
 
                 Formation updatedFormation = formationRepository.save(formation);
+                if (!Objects.equals(previousStatus, updatedFormation.getStatutFormation().getCode())) {
+                    formationNotifications.notifyConcerned(updatedFormation, "statut " + updatedFormation.getStatutFormation().getCode());
+                }
                 return mapToDTO(updatedFormation);
         }
 
@@ -355,12 +370,15 @@ public class FormationServiceImpl implements IFormationService {
                 }
 
                 // Mettre à jour le statut de la formation avec le nouveau statut
+                boolean changed = formation.getStatutFormation() == null
+                        || !Objects.equals(formation.getStatutFormation().getCode(), newStatutFormationCode);
                 formation.setStatutFormation(newStatutFormation);
 
                 // Enregistrer la formation mise à jour dans la base de données
                 Formation savedFormation = formationRepository.save(formation);
 
                 // Mapper la formation mise à jour vers le DTO et le retourner
+                if (changed) formationNotifications.notifyConcerned(savedFormation, "statut " + newStatutFormationCode);
                 return mapToDTO(savedFormation);
         }
 

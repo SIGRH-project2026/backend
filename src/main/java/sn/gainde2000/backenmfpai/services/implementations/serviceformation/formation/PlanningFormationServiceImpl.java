@@ -42,6 +42,8 @@ import java.util.Set;
 @Transactional
 // @Sl4j
 public class PlanningFormationServiceImpl implements IPlanningFormationService {
+    private final FormationNotifications formationNotifications;
+
 
     private final PlanningFormationRepository planningFormationRepository;
     private final FileService fileService;
@@ -53,7 +55,8 @@ public class PlanningFormationServiceImpl implements IPlanningFormationService {
     public PlanningFormationServiceImpl(PlanningFormationRepository planningFormationRepository,
             FileService fileService,
             FileRepository fileRepository, FormationRepository formationRepository,
-            PlanningFormationDTO planningFormationDTO) {
+            PlanningFormationDTO planningFormationDTO, FormationNotifications formationNotifications) {
+        this.formationNotifications = formationNotifications;
         this.planningFormationRepository = planningFormationRepository;
         this.fileService = fileService;
         this.fileRepository = fileRepository;
@@ -91,7 +94,9 @@ public class PlanningFormationServiceImpl implements IPlanningFormationService {
         }
         planningEntity.setCommentaire(planningFormationDTO.getCommentaire());
 
-        return planningFormationRepository.save(planningEntity);
+        PlanningFormation saved = planningFormationRepository.save(planningEntity);
+        formationNotifications.notifyConcerned(saved.getFormation(), "un planning est disponible");
+        return saved;
     }
 
     // @Override

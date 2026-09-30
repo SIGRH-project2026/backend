@@ -79,7 +79,6 @@ public class AuthentificationImpl implements IAuthentification {
         UserManager utilisateur = userManagerMapper.toEntity(utilisateurDTO);
         String password = PasswordGenerator.generateRandomString();
         utilisateur.setPassword(password);
-        log.info("................password: = {}", utilisateur.getPassword());
 
         utilisateur.setPassword(encoder.encode(utilisateur.getPassword()));
         utilisateur.setFirstLog(true);
@@ -177,7 +176,7 @@ public class AuthentificationImpl implements IAuthentification {
 
     @Override
     public Response<Object> refreshToken(String token) {
-        if (!jwtProvider.validationJwtToken(token)) {
+        if (!jwtProvider.validationRefreshToken(token)) {
             throw new MFPAIException(MFPAIMessage.CONNEXION_TOKEN_INVALIDE);
         }
         String accessToken = jwtProvider.generateAccessTokenFromRefreshToken(token);

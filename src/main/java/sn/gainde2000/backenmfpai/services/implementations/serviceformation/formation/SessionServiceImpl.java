@@ -24,6 +24,8 @@ import java.util.Set;
 @Service
 @Transactional
 public class SessionServiceImpl implements ISessionService {
+    private final FormationNotifications formationNotifications;
+
 
     private final SessionRepository sessionRepository;
     private final FileRepository fileRepository;
@@ -32,7 +34,8 @@ public class SessionServiceImpl implements ISessionService {
     private final FormationRepository formationRepository;
 
     public SessionServiceImpl(SessionRepository sessionRepository, FileRepository fileRepository,
-            FileService fileService, SessionDTO sessionDTO, FormationRepository formationRepository) {
+            FileService fileService, SessionDTO sessionDTO, FormationRepository formationRepository, FormationNotifications formationNotifications) {
+        this.formationNotifications = formationNotifications;
         this.sessionRepository = sessionRepository;
         this.fileRepository = fileRepository;
         this.fileService = fileService;
@@ -62,7 +65,9 @@ public class SessionServiceImpl implements ISessionService {
             sessionEntity.setFile(uploadedFile);
         }
 
-        return sessionRepository.save(sessionEntity);
+        Session saved = sessionRepository.save(sessionEntity);
+        formationNotifications.notifyConcerned(saved.getFormation(), "une session a été créée");
+        return saved;
     }
 
     @Override

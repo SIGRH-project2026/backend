@@ -1,5 +1,9 @@
 package sn.gainde2000.backenmfpai.services.implementations.serviceformation.formation;
 
+import org.springframework.transaction.annotation.Transactional;
+
+import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,7 +27,10 @@ import sn.gainde2000.backenmfpai.web.dtos.requests.serviceformation.formation.Pa
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ParticipationServiceImpl implements IParticipationService {
+    private final BusinessNotificationService businessNotifications;
+
 
     private final ParticipationRepository participationRepository;
     private final FormationRepository formationRepository;
@@ -49,6 +56,8 @@ public class ParticipationServiceImpl implements IParticipationService {
         participation.setNumeroDemande(participationDTO.getNumeroDemande());
 
         Participation savedParticipation = participationRepository.save(participation);
+        businessNotifications.notify(centralLevel, "Inscription à une formation",
+                "Votre participation à la formation " + formation.getReference() + " a été enregistrée.");
         return mapToDTO(savedParticipation);
     }
 

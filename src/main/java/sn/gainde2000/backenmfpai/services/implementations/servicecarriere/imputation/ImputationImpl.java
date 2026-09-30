@@ -12,6 +12,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import sn.gainde2000.backenmfpai.commons.Notification.INotification;
+import sn.gainde2000.backenmfpai.commons.Notification.Notification;
 import org.springframework.web.multipart.MultipartFile;
 import sn.gainde2000.backenmfpai.commons.utils.JasperGenerator;
 import sn.gainde2000.backenmfpai.commons.utils.mail.MailService;
@@ -73,6 +78,7 @@ public class ImputationImpl implements IImputation {
     private final MailService mailService;
     private final FileImpl fileImpl;
     private final JasperGenerator jasperGenerator;
+    private final INotification notificationService;
 
     private boolean hasGlobalAccess(Utilisateur utilisateur) {
         return utilisateur.getProfils().stream()
@@ -480,6 +486,7 @@ public Page<ImputationOuBulletin> getMesCreations(int page, int size, String typ
      * }
      */
     @Override
+    @Transactional
     public ImputationOuBulletin createimputation(ImputationRequestdto dto) {
         Optional<Utilisateur> utilisateurOptional = iUtilisateurRepository.findById(dto.getUtilisateurId());
 
@@ -494,14 +501,39 @@ public Page<ImputationOuBulletin> getMesCreations(int page, int size, String typ
 
             ImputationOuBulletin saved = imputationRepository.save(imputationOuBulletin);
             if (Objects.nonNull(saved)) {
-                sendNotification(new LoginFormDTO(
-                        utilisateurOptional.get().getEmail(), ""));
+                if (dto.getId() == null || dto.getId() == 0) {
+                    notifyCreation(saved, utilisateurOptional.get());
+                }
                 return saved;
             } else {
                 throw new EntityNotFoundException("Erreur lors de la sauvegarde");
             }
         } else {
             throw new EntityNotFoundException("Utilisateur introuvable");
+        }
+    }
+
+    private void notifyCreation(ImputationOuBulletin saved, Utilisateur agent) {
+        boolean bulletin = "Bulletin de visite".equals(saved.getTypeDemande());
+        String subject = bulletin ? "Création de votre bulletin de visite" : "Création de votre imputation budgétaire";
+        String message = (bulletin ? "Votre bulletin de visite n° " : "Votre imputation budgétaire n° ")
+                + saved.getNumeroDemande() + (bulletin ? " a été créé." : " a été créée.")
+                + " Vous pouvez le consulter dans votre espace personnel sur la plateforme SIGRH.";
+        notificationService.notifyUser(Notification.builder()
+                .idUser(agent.getId()).objet(subject).message(message).build());
+        if (StringUtils.isBlank(agent.getEmail())) {
+            return;
+        }
+        MailInfosDTO mail = new MailInfosDTO(null, message, subject, null, agent.getEmail());
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    sendEmail(mail);
+                }
+            });
+        } else {
+            sendEmail(mail);
         }
     }
 
