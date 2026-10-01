@@ -10,7 +10,7 @@ import java.util.List;
 public class AllowedOrigins {
     private final List<String> values;
 
-    public AllowedOrigins(@Value("${app.security.allowed-origins:http://localhost:4200,http://localhost:4300}") String configured) {
+    public AllowedOrigins(@Value("${app.security.allowed-origins:http://localhost:4200}") String configured) {
         values = Arrays.stream(configured.split(",")).map(String::trim).filter(s -> !s.isEmpty())
                 .map(AllowedOrigins::validate).distinct().toList();
         if (values.isEmpty()) throw new IllegalArgumentException("At least one allowed origin is required");

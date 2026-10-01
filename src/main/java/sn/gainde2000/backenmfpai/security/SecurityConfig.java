@@ -45,7 +45,9 @@ public class SecurityConfig {
                                 "/api/formations/allformationcontinueordiplomante/**", "/api/formations/allFormationByType/**",
                                 "/plan-formation/list", "/plan-formation/listEnCours", "/plan-formation/{id:[0-9]+}",
                                 "/themeformations/byPlanFormation/**", "/filieres/list/**", "/images/**",
-                                "/actuator/health").permitAll()
+                                "/actuator/health",
+                                // Compteurs de la page d'accueil (totaux uniquement).
+                                "/static/etablissement/count", "/utilisateur/getAll").permitAll()
                         // The notification topic carries only a refresh signal, never notification contents.
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**",
