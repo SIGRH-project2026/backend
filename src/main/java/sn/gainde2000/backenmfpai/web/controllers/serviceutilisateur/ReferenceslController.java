@@ -235,6 +235,14 @@ public class ReferenceslController {
         return ResponseEntity.ok().body(response);
     }
 
+    // Public : compteur de la page d'accueil, n'expose que le total.
+    @GetMapping("/etablissement/count")
+    public ResponseEntity<MFPAIResponse> countEtablissement() {
+        MFPAIResponse response = MFPAIResponse.success(iprofil.listEtablissement().size());
+
+        return ResponseEntity.ok().body(response);
+    }
+
     @GetMapping("/etablissement/{code}")
     public ResponseEntity<MFPAIResponse> listEtablissementByCFPCode(@PathVariable(name = "code") String code) {
         List<Etablissement> etablissements = iprofil.listEtablissementByCFPCode(code);
