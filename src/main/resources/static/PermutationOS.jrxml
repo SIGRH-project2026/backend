@@ -1,82 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 9.0.0.final using JasperReports Library version 6.21.0-4f56c4f36cd19e17675219a9ac4692d5f0f13b06  -->
+<!-- Ordre de service de permutation (OS d'une permutation et OS global « Générer OS »).
+     Mise en page calquée sur l'OS officiel signé : date, numéro et signature du Ministre laissés vides,
+     remplis à la main après impression.
+     Pas d'extension de polices : le gras / l'italique passent par pdfFontName (Helvetica-Bold, ...). -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="PermutationOS" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="15" bottomMargin="15" uuid="4eedbb89-b4f6-4469-9ab6-f642a1688cf7">
     <property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
-    <property name="com.jaspersoft.studio.unit." value="pixel"/>
-    <property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
-    <property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
-    <property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
-    <property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
-    <property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
-    <property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
-    <property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
-    <property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-    <style name="Title" forecolor="#FFFFFF" fontName="Times New Roman" fontSize="50" isBold="false" pdfFontName="Times-Bold"/>
-    <style name="SubTitle" forecolor="#CCCCCC" fontName="Times New Roman" fontSize="18" isBold="false" pdfFontName="Times-Roman"/>
-    <style name="Column header" forecolor="#666666" fontName="Times New Roman" fontSize="14" isBold="true"/>
-    <style name="Detail" mode="Transparent" fontName="Times New Roman"/>
-    <style name="Row" mode="Transparent" fontName="Times New Roman" pdfFontName="Times-Roman">
-        <conditionalStyle>
-            <conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
-            <style mode="Opaque" backcolor="#EEEFF0"/>
-        </conditionalStyle>
-    </style>
-    <style name="Table">
+    <style name="Table 1_CH" mode="Opaque" backcolor="#FFFFFF">
         <box>
-            <pen lineWidth="1.0" lineColor="#000000"/>
-            <topPen lineWidth="1.0" lineColor="#000000"/>
-            <leftPen lineWidth="1.0" lineColor="#000000"/>
-            <bottomPen lineWidth="1.0" lineColor="#000000"/>
-            <rightPen lineWidth="1.0" lineColor="#000000"/>
-        </box>
-    </style>
-    <style name="Table_TH" mode="Opaque" backcolor="#FFFFFF">
-        <box>
-            <pen lineWidth="0.5" lineColor="#000000"/>
-            <topPen lineWidth="0.5" lineColor="#000000"/>
-            <leftPen lineWidth="0.5" lineColor="#000000"/>
-            <bottomPen lineWidth="0.5" lineColor="#000000"/>
-            <rightPen lineWidth="0.5" lineColor="#000000"/>
-        </box>
-    </style>
-    <style name="Table_CH" mode="Opaque" backcolor="#CACED0">
-        <box>
-            <pen lineWidth="0.5" lineColor="#000000"/>
-            <topPen lineWidth="0.5" lineColor="#000000"/>
-            <leftPen lineWidth="0.5" lineColor="#000000"/>
-            <bottomPen lineWidth="0.5" lineColor="#000000"/>
-            <rightPen lineWidth="0.5" lineColor="#000000"/>
-        </box>
-    </style>
-    <style name="Table_TD" mode="Opaque" backcolor="#FFFFFF">
-        <box>
-            <pen lineWidth="0.5" lineColor="#000000"/>
-            <topPen lineWidth="0.5" lineColor="#000000"/>
-            <leftPen lineWidth="0.5" lineColor="#000000"/>
-            <bottomPen lineWidth="0.5" lineColor="#000000"/>
-            <rightPen lineWidth="0.5" lineColor="#000000"/>
-        </box>
-        <conditionalStyle>
-            <conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
-            <style backcolor="#D8D8D8"/>
-        </conditionalStyle>
-    </style>
-    <style name="Table 1_TH" mode="Opaque" backcolor="#F0F8FF">
-        <box>
-            <pen lineWidth="0.5" lineColor="#000000"/>
-            <topPen lineWidth="0.5" lineColor="#000000"/>
-            <leftPen lineWidth="0.5" lineColor="#000000"/>
-            <bottomPen lineWidth="0.5" lineColor="#000000"/>
-            <rightPen lineWidth="0.5" lineColor="#000000"/>
-        </box>
-    </style>
-    <style name="Table 1_CH" mode="Opaque" backcolor="#C7CCD1">
-        <box>
-            <pen lineWidth="0.5" lineColor="#000000"/>
-            <topPen lineWidth="0.5" lineColor="#000000"/>
-            <leftPen lineWidth="0.5" lineColor="#000000"/>
-            <bottomPen lineWidth="0.5" lineColor="#000000"/>
-            <rightPen lineWidth="0.5" lineColor="#000000"/>
+            <pen lineWidth="0.75" lineColor="#000000"/>
+            <topPen lineWidth="0.75" lineColor="#000000"/>
+            <leftPen lineWidth="0.75" lineColor="#000000"/>
+            <bottomPen lineWidth="0.75" lineColor="#000000"/>
+            <rightPen lineWidth="0.75" lineColor="#000000"/>
         </box>
     </style>
     <style name="Table 1_TD" mode="Opaque" backcolor="#FFFFFF">
@@ -88,121 +23,96 @@
             <rightPen lineWidth="0.5" lineColor="#000000"/>
         </box>
     </style>
-    <subDataset name="tableDataset" uuid="f13e6d36-5148-4ecc-bbe3-3035def80980">
-        <queryString>
-            <![CDATA[]]>
-        </queryString>
-    </subDataset>
     <subDataset name="listePermutation" uuid="f7ae32c7-9751-4326-84c7-48db62ef3d7b">
         <queryString>
             <![CDATA[]]>
         </queryString>
+        <field name="matricule" class="java.lang.String"/>
         <field name="prenoms" class="java.lang.String"/>
         <field name="nom" class="java.lang.String"/>
-        <field name="matricule" class="java.lang.String"/>
+        <field name="corpsGrade" class="java.lang.String"/>
         <field name="specialite" class="java.lang.String"/>
+        <field name="origine" class="java.lang.String"/>
         <field name="destination" class="java.lang.String"/>
         <field name="academie" class="java.lang.String"/>
-        <field name="origine" class="java.lang.String"/>
     </subDataset>
     <parameter name="CollectionBeanParam" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource">
         <defaultValueExpression><![CDATA[$P{CollectionBeanParam}]]></defaultValueExpression>
     </parameter>
     <parameter name="dateCreation" class="java.util.Date">
-         <defaultValueExpression><![CDATA[new java.util.Date()]]></defaultValueExpression>
+        <defaultValueExpression><![CDATA[new java.util.Date()]]></defaultValueExpression>
     </parameter>
     <queryString>
         <![CDATA[]]>
     </queryString>
     <title>
-        <band height="86" splitType="Stretch">
-            <property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+        <band height="116" splitType="Stretch">
             <staticText>
-                <reportElement x="550" y="2" width="251" height="20" uuid="0f86baff-6386-4f3f-b3fe-2388707babe8"/>
-                <box rightPadding="4"/>
-                <textElement textAlignment="Right">
-                    <font size="10"/>
-                </textElement>
-                <text><![CDATA[N°....................MEFPT/SG/DRH/Div. GPEEC]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="4" y="0" width="305" height="20" uuid="e622555d-198b-4ccd-a4a1-c59c53304058">
-                    <property name="local_mesure_unitheight" value="pixel"/>
-                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
-                </reportElement>
+                <reportElement x="0" y="0" width="300" height="18" uuid="e622555d-198b-4ccd-a4a1-c59c53304058"/>
                 <textElement>
-                    <font size="14" isBold="true"/>
+                    <font size="13" isBold="true" pdfFontName="Helvetica-Bold"/>
                 </textElement>
                 <text><![CDATA[REPUBLIQUE DU SENEGAL]]></text>
             </staticText>
             <staticText>
-                <reportElement x="4" y="55" width="310" height="30" uuid="b8cc42fd-b569-497d-834d-7e854040ad18"/>
-                <textElement>
-                    <font size="10"/>
-                </textElement>
-                <text><![CDATA[Ministère de l'Emploi et de la Formation
-professionnelle et technique (MEFPT)]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="3" y="22" width="237" height="15" uuid="c226e44d-3bb5-4145-b0b3-903bf1d79fde"/>
+                <reportElement x="0" y="18" width="240" height="14" uuid="c226e44d-3bb5-4145-b0b3-903bf1d79fde"/>
                 <textElement textAlignment="Center">
-                    <font size="10" isItalic="true"/>
+                    <font size="10" isItalic="true" pdfFontName="Helvetica-Oblique"/>
                 </textElement>
-                <text><![CDATA[Un Peuple - Un But - Une Foi]]></text>
+                <text><![CDATA[Un Peuple – Un But – Une Foi]]></text>
             </staticText>
             <staticText>
-                <reportElement x="4" y="38" width="205" height="15" uuid="b96f7183-44f8-43ad-ba60-43d8fbf50b6e"/>
+                <reportElement x="0" y="32" width="240" height="14" uuid="b96f7183-44f8-43ad-ba60-43d8fbf50b6e"/>
                 <textElement textAlignment="Center">
                     <font size="10"/>
                 </textElement>
                 <text><![CDATA[__________]]></text>
             </staticText>
-            <!-- <staticText>
-                <reportElement x="564" y="20" width="81" height="20" uuid="45448f16-5a16-4f81-a615-c62911eb0452"/>
-                <box rightPadding="4"/>
-                <textElement textAlignment="Right"/>
-                <text><![CDATA[Dakar, le ]]></text>
-            </staticText> -->
-            <textField pattern="dd MMMM yyyy">
-                <reportElement x="564" y="20" width="237" height="20" uuid="45448f16-5a16-4f81-a615-c62911eb0452"/>
-                <box rightPadding="4"/>
-                <textElement textAlignment="Right">
-                    <font size="10"/>
-                </textElement>
-                <textFieldExpression><![CDATA["Dakar, le " + new java.text.SimpleDateFormat("dd MMMM yyyy", java.util.Locale.FRENCH).format($P{dateCreation})]]></textFieldExpression>
-            </textField>
-        </band>
-    </title>
-    <columnHeader>
-        <band height="22">
             <staticText>
-                <reportElement x="310" y="0" width="200" height="22" uuid="57aed2b1-4f4e-40a3-a6ad-54dae8dd4c5a">
-                    <property name="local_mesure_unitheight" value="pixel"/>
-                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
-                </reportElement>
+                <reportElement x="0" y="50" width="330" height="34" uuid="b8cc42fd-b569-497d-834d-7e854040ad18"/>
+                <textElement>
+                    <font size="11"/>
+                </textElement>
+                <text><![CDATA[Ministère de l'Emploi et de la Formation
+professionnelle et technique]]></text>
+            </staticText>
+            <!-- numéro et date apposés à la main après impression -->
+            <staticText>
+                <reportElement x="500" y="0" width="301" height="18" uuid="0f86baff-6386-4f3f-b3fe-2388707babe8"/>
+                <textElement textAlignment="Right">
+                    <font size="11"/>
+                </textElement>
+                <text><![CDATA[N°....................MEFPT/SG/DRH/Div. GPEEC]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="560" y="26" width="80" height="18" uuid="45448f16-5a16-4f81-a615-c62911eb0452"/>
+                <textElement>
+                    <font size="11"/>
+                </textElement>
+                <text><![CDATA[Dakar, le]]></text>
+            </staticText>
+            <!-- dans le titre (et non l'en-tête de colonne) pour n'apparaître qu'en première page -->
+            <staticText>
+                <reportElement x="0" y="90" width="802" height="22" uuid="57aed2b1-4f4e-40a3-a6ad-54dae8dd4c5a"/>
                 <textElement textAlignment="Center">
-                    <font size="14" isBold="true"/>
+                    <font size="16" isBold="true" pdfFontName="Helvetica-Bold"/>
                 </textElement>
                 <text><![CDATA[ORDRE DE SERVICE]]></text>
             </staticText>
         </band>
-    </columnHeader>
+    </title>
     <detail>
-        <band height="120">
+        <band height="70">
             <staticText>
-                <reportElement x="1" y="0" width="669" height="20" uuid="139ebe8d-25b0-411e-986c-270015400874">
-                    <property name="local_mesure_unitheight" value="pixel"/>
-                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
-                </reportElement>
+                <reportElement x="0" y="0" width="802" height="18" uuid="139ebe8d-25b0-411e-986c-270015400874"/>
                 <textElement>
-                    <font size="11" isBold="false"/>
+                    <font size="11"/>
                 </textElement>
-                <text><![CDATA[Les agents ci-dessous nommés permutent leurs postes conformément au tableau suivant :]]></text>
+                <text><![CDATA[Le personnel enseignant ci-dessous nommé est permuté conformément au tableau suivant :]]></text>
             </staticText>
             <componentElement>
-                <reportElement x="3" y="22" width="797" height="48" uuid="fc761dc4-3fe4-492c-aff9-58790407bb5c">
+                <reportElement x="2" y="22" width="797" height="40" uuid="fc761dc4-3fe4-492c-aff9-58790407bb5c">
                     <property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
-                    <property name="com.jaspersoft.studio.table.style.table_header" value="Table 1_TH"/>
                     <property name="com.jaspersoft.studio.table.style.column_header" value="Table 1_CH"/>
                     <property name="com.jaspersoft.studio.table.style.detail" value="Table 1_TD"/>
                 </reportElement>
@@ -210,148 +120,161 @@ professionnelle et technique (MEFPT)]]></text>
                     <datasetRun subDataset="listePermutation" uuid="1009b9f9-acd3-406a-bfb9-89cc0bb9fafd">
                         <dataSourceExpression><![CDATA[$P{CollectionBeanParam}]]></dataSourceExpression>
                     </datasetRun>
-                    <jr:column width="110" uuid="0801187b-090f-4a94-8928-8b32dcbe2135">
-                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
-                        <jr:columnHeader style="Table 1_CH" height="17" rowSpan="1">
+                    <jr:column width="85" uuid="0801187b-090f-4a94-8928-8b32dcbe2135">
+                        <jr:columnHeader style="Table 1_CH" height="20" rowSpan="1">
                             <staticText>
-                                <reportElement x="0" y="0" width="110" height="17" uuid="a4da5f5c-29a3-4141-8876-9645d566ab2c"/>
+                                <reportElement x="0" y="0" width="85" height="20" uuid="a4da5f5c-29a3-4141-8876-9645d566ab2c"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                                    <font size="10" isBold="true"/>
+                                    <font size="11" isBold="true" pdfFontName="Helvetica-Bold"/>
                                 </textElement>
                                 <text><![CDATA[Matricule]]></text>
                             </staticText>
                         </jr:columnHeader>
-                        <jr:detailCell style="Table 1_TD" height="15">
-                            <textField>
-                                <reportElement x="0" y="0" width="110" height="15" uuid="60d78625-3d23-443c-8b0c-84a208d1b84a"/>
+                        <jr:detailCell style="Table 1_TD" height="16">
+                            <textField isBlankWhenNull="true">
+                                <reportElement x="0" y="0" width="85" height="16" uuid="60d78625-3d23-443c-8b0c-84a208d1b84a"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                                    <font size="9"/>
+                                    <font size="10"/>
                                 </textElement>
                                 <textFieldExpression><![CDATA[$F{matricule}]]></textFieldExpression>
                             </textField>
                         </jr:detailCell>
                     </jr:column>
-                    <jr:column width="110" uuid="9ddb5c1c-dc0f-4b4e-b996-8939aafb5154">
-                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
-                        <jr:columnHeader style="Table 1_CH" height="17" rowSpan="1">
+                    <jr:column width="105" uuid="9ddb5c1c-dc0f-4b4e-b996-8939aafb5154">
+                        <jr:columnHeader style="Table 1_CH" height="20" rowSpan="1">
                             <staticText>
-                                <reportElement x="0" y="0" width="110" height="17" uuid="44dae2d9-8c78-4097-8b91-99d17cccdd07"/>
+                                <reportElement x="0" y="0" width="105" height="20" uuid="44dae2d9-8c78-4097-8b91-99d17cccdd07"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                                    <font size="10" isBold="true"/>
+                                    <font size="11" isBold="true" pdfFontName="Helvetica-Bold"/>
                                 </textElement>
                                 <text><![CDATA[Prénom (s)]]></text>
                             </staticText>
                         </jr:columnHeader>
-                        <jr:detailCell style="Table 1_TD" height="15">
-                            <textField>
-                                <reportElement x="0" y="0" width="110" height="15" uuid="ab556ecb-28ab-4e9d-a09c-1d0391f16187"/>
+                        <jr:detailCell style="Table 1_TD" height="16">
+                            <textField isBlankWhenNull="true">
+                                <reportElement x="0" y="0" width="105" height="16" uuid="ab556ecb-28ab-4e9d-a09c-1d0391f16187"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                                    <font size="9"/>
+                                    <font size="10"/>
                                 </textElement>
                                 <textFieldExpression><![CDATA[$F{prenoms}]]></textFieldExpression>
                             </textField>
                         </jr:detailCell>
                     </jr:column>
-                    <jr:column width="90" uuid="37a50247-e099-4826-aecf-e8ce2d9a2cb2">
-                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
-                        <jr:columnHeader style="Table 1_CH" height="17" rowSpan="1">
+                    <jr:column width="80" uuid="37a50247-e099-4826-aecf-e8ce2d9a2cb2">
+                        <jr:columnHeader style="Table 1_CH" height="20" rowSpan="1">
                             <staticText>
-                                <reportElement x="0" y="0" width="90" height="17" uuid="89cf1e4d-157f-4ad6-b183-930370194b20"/>
+                                <reportElement x="0" y="0" width="80" height="20" uuid="89cf1e4d-157f-4ad6-b183-930370194b20"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                                    <font size="10" isBold="true"/>
+                                    <font size="11" isBold="true" pdfFontName="Helvetica-Bold"/>
                                 </textElement>
-                                <text><![CDATA[Nom]]></text>
+                                <text><![CDATA[NOM]]></text>
                             </staticText>
                         </jr:columnHeader>
-                        <jr:detailCell style="Table 1_TD" height="15">
-                            <textField>
-                                <reportElement x="0" y="0" width="90" height="15" uuid="deee77c3-2510-4e47-868f-a3d60e5147ba"/>
+                        <jr:detailCell style="Table 1_TD" height="16">
+                            <textField isBlankWhenNull="true">
+                                <reportElement x="0" y="0" width="80" height="16" uuid="deee77c3-2510-4e47-868f-a3d60e5147ba"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                                    <font size="9"/>
+                                    <font size="10"/>
                                 </textElement>
-                                <textFieldExpression><![CDATA[$F{nom}]]></textFieldExpression>
+                                <textFieldExpression><![CDATA[$F{nom} == null ? null : $F{nom}.toUpperCase()]]></textFieldExpression>
                             </textField>
                         </jr:detailCell>
                     </jr:column>
-                    <jr:column width="140" uuid="0fa6906f-47d9-433c-9577-f505c445293a">
-                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
-                        <jr:columnHeader style="Table 1_CH" height="17" rowSpan="1">
+                    <jr:column width="95" uuid="2b6f4d1e-8a3c-4e5f-9b7d-1c2e3f4a5b6c">
+                        <jr:columnHeader style="Table 1_CH" height="20" rowSpan="1">
                             <staticText>
-                                <reportElement x="0" y="0" width="140" height="17" uuid="7bf3f876-3472-441d-8b2b-1328591c18f5"/>
+                                <reportElement x="0" y="0" width="95" height="20" uuid="3c7e5f2a-9b4d-4f6e-8c1a-2d3e4f5a6b7c"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                                    <font size="10" isBold="true"/>
+                                    <font size="11" isBold="true" pdfFontName="Helvetica-Bold"/>
+                                </textElement>
+                                <text><![CDATA[Corps et grade]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell style="Table 1_TD" height="16">
+                            <textField isBlankWhenNull="true">
+                                <reportElement x="0" y="0" width="95" height="16" uuid="4d8f6a3b-0c5e-4a7f-9d2b-3e4f5a6b7c8d"/>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="10"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{corpsGrade}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="115" uuid="0fa6906f-47d9-433c-9577-f505c445293a">
+                        <jr:columnHeader style="Table 1_CH" height="20" rowSpan="1">
+                            <staticText>
+                                <reportElement x="0" y="0" width="115" height="20" uuid="7bf3f876-3472-441d-8b2b-1328591c18f5"/>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="11" isBold="true" pdfFontName="Helvetica-Bold"/>
                                 </textElement>
                                 <text><![CDATA[Spécialité]]></text>
                             </staticText>
                         </jr:columnHeader>
-                        <jr:detailCell style="Table 1_TD" height="15">
-                            <textField>
-                                <reportElement x="0" y="0" width="140" height="15" uuid="8f915e22-b165-4f84-a669-8da5c0ee4ba9"/>
+                        <jr:detailCell style="Table 1_TD" height="16">
+                            <textField isBlankWhenNull="true">
+                                <reportElement x="0" y="0" width="115" height="16" uuid="8f915e22-b165-4f84-a669-8da5c0ee4ba9"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                                    <font size="9"/>
+                                    <font size="10"/>
                                 </textElement>
                                 <textFieldExpression><![CDATA[$F{specialite}]]></textFieldExpression>
                             </textField>
                         </jr:detailCell>
                     </jr:column>
-                    <jr:column width="130" uuid="1ed0c5a1-3bf7-4820-8cd4-6ba9468e5fe7">
-                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
-                        <jr:columnHeader style="Table 1_CH" height="17" rowSpan="1">
+                    <jr:column width="115" uuid="1ed0c5a1-3bf7-4820-8cd4-6ba9468e5fe7">
+                        <jr:columnHeader style="Table 1_CH" height="20" rowSpan="1">
                             <staticText>
-                                <reportElement x="0" y="0" width="130" height="17" uuid="219c3e34-11ad-467d-8e1a-e3cbb72d6693"/>
+                                <reportElement x="0" y="0" width="115" height="20" uuid="219c3e34-11ad-467d-8e1a-e3cbb72d6693"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                                    <font size="10" isBold="true"/>
+                                    <font size="11" isBold="true" pdfFontName="Helvetica-Bold"/>
                                 </textElement>
                                 <text><![CDATA[Venant de]]></text>
                             </staticText>
                         </jr:columnHeader>
-                        <jr:detailCell style="Table 1_TD" height="15">
-                            <textField>
-                                <reportElement x="0" y="0" width="130" height="15" uuid="86d8485c-f427-41a1-b23b-168ab822e69a"/>
+                        <jr:detailCell style="Table 1_TD" height="16">
+                            <textField isBlankWhenNull="true">
+                                <reportElement x="0" y="0" width="115" height="16" uuid="86d8485c-f427-41a1-b23b-168ab822e69a"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                                    <font size="9"/>
+                                    <font size="10"/>
                                 </textElement>
                                 <textFieldExpression><![CDATA[$F{origine}]]></textFieldExpression>
                             </textField>
                         </jr:detailCell>
                     </jr:column>
-                    <jr:column width="120" uuid="d7c72c0d-cfff-47d9-bfed-0d4462ce7f6e">
-                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
-                        <jr:columnHeader style="Table 1_CH" height="17" rowSpan="1">
+                    <jr:column width="115" uuid="d7c72c0d-cfff-47d9-bfed-0d4462ce7f6e">
+                        <jr:columnHeader style="Table 1_CH" height="20" rowSpan="1">
                             <staticText>
-                                <reportElement x="0" y="0" width="120" height="17" uuid="9774579f-60ea-4373-be53-a62edf74ded5"/>
+                                <reportElement x="0" y="0" width="115" height="20" uuid="9774579f-60ea-4373-be53-a62edf74ded5"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                                    <font size="10" isBold="true"/>
+                                    <font size="11" isBold="true" pdfFontName="Helvetica-Bold"/>
                                 </textElement>
-                                <text><![CDATA[Est permuté à]]></text>
+                                <text><![CDATA[Est muté à]]></text>
                             </staticText>
                         </jr:columnHeader>
-                        <jr:detailCell style="Table 1_TD" height="15">
-                            <textField>
-                                <reportElement x="0" y="0" width="120" height="15" uuid="e27a30f7-8525-4601-8c11-b5390509fa8c"/>
+                        <jr:detailCell style="Table 1_TD" height="16">
+                            <textField isBlankWhenNull="true">
+                                <reportElement x="0" y="0" width="115" height="16" uuid="e27a30f7-8525-4601-8c11-b5390509fa8c"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                                    <font size="9"/>
+                                    <font size="10"/>
                                 </textElement>
                                 <textFieldExpression><![CDATA[$F{destination}]]></textFieldExpression>
                             </textField>
                         </jr:detailCell>
                     </jr:column>
-                    <jr:column width="97" uuid="348beaf5-9fa4-465e-a41d-21321e69284b">
-                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column7"/>
-                        <jr:columnHeader style="Table 1_CH" height="17" rowSpan="1">
+                    <jr:column width="87" uuid="348beaf5-9fa4-465e-a41d-21321e69284b">
+                        <jr:columnHeader style="Table 1_CH" height="20" rowSpan="1">
                             <staticText>
-                                <reportElement x="0" y="0" width="97" height="17" uuid="668d8a4c-eaf6-45a0-9827-e799b22e6853"/>
+                                <reportElement x="0" y="0" width="87" height="20" uuid="668d8a4c-eaf6-45a0-9827-e799b22e6853"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                                    <font size="10" isBold="true"/>
+                                    <font size="11" isBold="true" pdfFontName="Helvetica-Bold"/>
                                 </textElement>
                                 <text><![CDATA[Académie]]></text>
                             </staticText>
                         </jr:columnHeader>
-                        <jr:detailCell style="Table 1_TD" height="15">
-                            <textField>
-                                <reportElement x="0" y="0" width="97" height="15" uuid="48a24839-148d-4c3e-bd5b-9605775c8d3d"/>
+                        <jr:detailCell style="Table 1_TD" height="16">
+                            <textField isBlankWhenNull="true">
+                                <reportElement x="0" y="0" width="87" height="16" uuid="48a24839-148d-4c3e-bd5b-9605775c8d3d"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                                    <font size="9"/>
+                                    <font size="10"/>
                                 </textElement>
                                 <textFieldExpression><![CDATA[$F{academie}]]></textFieldExpression>
                             </textField>
@@ -361,82 +284,87 @@ professionnelle et technique (MEFPT)]]></text>
             </componentElement>
         </band>
     </detail>
-
     <pageFooter>
-        <band height="20">
+        <band height="18">
             <textField>
-                <reportElement x="350" y="2" width="60" height="14" uuid="8a1c2f3e-6b4d-4a1a-9e2b-3c5f7a9d1e0b"/>
+                <reportElement x="700" y="2" width="65" height="14" uuid="8a1c2f3e-6b4d-4a1a-9e2b-3c5f7a9d1e0b"/>
                 <textElement textAlignment="Right">
-                    <font size="8"/>
+                    <font size="9"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER}]]></textFieldExpression>
             </textField>
             <textField evaluationTime="Report">
-                <reportElement x="410" y="2" width="40" height="14" uuid="1d2e3f4a-5b6c-4d7e-8f9a-0b1c2d3e4f5a"/>
+                <reportElement x="765" y="2" width="36" height="14" uuid="1d2e3f4a-5b6c-4d7e-8f9a-0b1c2d3e4f5a"/>
                 <textElement textAlignment="Left">
-                    <font size="8"/>
+                    <font size="9"/>
                 </textElement>
                 <textFieldExpression><![CDATA[" sur " + $V{PAGE_NUMBER}]]></textFieldExpression>
             </textField>
         </band>
     </pageFooter>
     <lastPageFooter>
-    <band height="140" splitType="Stretch">
-        <staticText>
-            <reportElement x="0" y="0" width="574" height="18" uuid="b268be5f-145f-4fb1-b992-b0dc0558d963"/>
-            <textElement>
-                <font size="11" isBold="false"/>
-            </textElement>
-            <text><![CDATA[Le présent ordre de service sera enregistré, publié et communiqué partout où besoin sera.]]></text>
-        </staticText>
-        <staticText>
-            <reportElement x="2" y="22" width="148" height="13" uuid="ea8b7dc8-de3b-4a87-9a5e-02afdc6a0fd5"/>
-            <textElement>
-                <font size="9" isBold="true"/>
-            </textElement>
-            <text><![CDATA[Ampliations :]]></text>
-        </staticText>
-        <staticText>
-            <reportElement x="0" y="36" width="150" height="80" uuid="e18764ba-a88c-4dad-871b-800557c12ee0"/>
-            <textElement>
-                <font size="8"/>
-            </textElement>
-            <text><![CDATA[-  MEFPT/SEPA
--  MEFPT/SG
--  MEFPT/DIRECTIONS/SERVICES
--  IA CONCERNEES
--  INTERESSES
--  CHRONO
--  ARCHIVES]]></text>
-        </staticText>
-        <staticText>
-            <reportElement x="550" y="22" width="251" height="18" uuid="7d3e6a1e-5b1a-4f2c-9c7a-2e6f0c9a1b3d"/>
-            <textElement textAlignment="Center">
-                <font size="11" isBold="true"/>
-            </textElement>
-            <text><![CDATA[Le Ministre]]></text>
-        </staticText>
-        <staticText>
-            <reportElement x="140" y="102" width="574" height="20" uuid="9dbcffe8-a7e9-4005-8d60-53f76d38460b"/>
-            <textElement textAlignment="Center">
-                <font size="7" isBold="false"/>
-            </textElement>
-            <text><![CDATA[Ministère de l'Emploi et de la Formation professionnelle et technique ; Sphère ministérielle de Diamniadio ; Arrondissement 2 ; Bâtiment C ; Tel : 33 865 70 80.]]></text>
-        </staticText>
-        <textField>
-            <reportElement x="350" y="124" width="60" height="14" uuid="6e5f8a2b-7c1d-4e9f-a3b6-2d4c8f1a9e7c"/>
-            <textElement textAlignment="Right">
-                <font size="8"/>
-            </textElement>
-            <textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER}]]></textFieldExpression>
-        </textField>
-        <textField evaluationTime="Report">
-            <reportElement x="410" y="124" width="40" height="14" uuid="9c8b7a6d-5e4f-4d3c-8b2a-1f0e9d8c7b6a"/>
-            <textElement textAlignment="Left">
-                <font size="8"/>
-            </textElement>
-            <textFieldExpression><![CDATA[" sur " + $V{PAGE_NUMBER}]]></textFieldExpression>
-        </textField>
-    </band>
-</lastPageFooter>
+        <band height="52" splitType="Stretch">
+            <textField>
+                <reportElement x="0" y="0" width="802" height="16" uuid="5a6b7c8d-9e0f-4a1b-8c2d-3e4f5a6b7c8d"/>
+                <textElement textAlignment="Center">
+                    <font size="11" isBold="true" isItalic="true" pdfFontName="Helvetica-BoldOblique"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Permutation " + new java.text.SimpleDateFormat("yyyy").format($P{dateCreation})]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="20" width="802" height="13" uuid="9dbcffe8-a7e9-4005-8d60-53f76d38460b"/>
+                <textElement textAlignment="Center">
+                    <font size="9"/>
+                </textElement>
+                <text><![CDATA[Ministère de l'Emploi et de la Formation professionnelle et technique ; Sphère ministérielle « Habib THIAM » de Diamniadio ; Arrondissement 2 ; Bâtiment C ; Tel : 33 865 70 85.]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="700" y="37" width="65" height="14" uuid="6e5f8a2b-7c1d-4e9f-a3b6-2d4c8f1a9e7c"/>
+                <textElement textAlignment="Right">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="765" y="37" width="36" height="14" uuid="9c8b7a6d-5e4f-4d3c-8b2a-1f0e9d8c7b6a"/>
+                <textElement textAlignment="Left">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[" sur " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </lastPageFooter>
+    <!-- juste après le tableau, comme sur l'OS officiel -->
+    <summary>
+        <band height="136" splitType="Prevent">
+            <staticText>
+                <reportElement x="0" y="4" width="600" height="18" uuid="b268be5f-145f-4fb1-b992-b0dc0558d963"/>
+                <textElement>
+                    <font size="11"/>
+                </textElement>
+                <text><![CDATA[Le présent ordre de service sera enregistré, publié et communiqué partout où besoin sera.]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="0" y="24" width="150" height="16" uuid="ea8b7dc8-de3b-4a87-9a5e-02afdc6a0fd5"/>
+                <textElement>
+                    <font size="11" isBold="true" isUnderline="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <text><![CDATA[Ampliation :]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="0" y="42" width="250" height="94" uuid="e18764ba-a88c-4dad-871b-800557c12ee0"/>
+                <textElement>
+                    <font size="10"/>
+                </textElement>
+                <text><![CDATA[-    MEFPT/SEPA
+-    MEFPT/SG
+-    MEFPT/DIRECTIONS/SERVICES
+-    IA CONCERNEES
+-    INTERESSES
+-    CHRONO
+-    ARCHIVES]]></text>
+            </staticText>
+            <!-- emplacement de la signature et du cachet du Ministre : laissé vide (à droite, x 560-800) -->
+        </band>
+    </summary>
 </jasperReport>

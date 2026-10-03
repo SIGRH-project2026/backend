@@ -18,6 +18,7 @@ public class PermutationReportDto {
     private String destination;
     private String academie;
     private String specialite;
+    private String corpsGrade;
     private String matriculeDemandeur;
     private String matriculeReceveur;
     private String prenomDemandeur;
