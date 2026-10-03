@@ -199,6 +199,13 @@ public class JasperGenerator {
                 .orElse(fallback);
     }
 
+    // colonne « Corps et grade » de l'OS de permutation, ex. « METP 2/1 »
+    private String corpsEtGrade(DeconcentratedLevel agent) {
+        String corps = agent.getCorpsGrade() != null && agent.getCorpsGrade().getLabel() != null ? agent.getCorpsGrade().getLabel() : "";
+        String grade = agent.getGrade() != null && agent.getGrade().getLabel() != null ? agent.getGrade().getLabel() : "";
+        return (corps + " " + grade).trim();
+    }
+
     // OS d'une seule permutation (modèle PermutationOS.jrxml, partagé avec l'OS global)
     public  byte[] getPermutationOS(Permutation permutation) throws FileNotFoundException, JRException {
         return getPermutationAllOS(List.of(permutation));
@@ -228,6 +235,8 @@ public class JasperGenerator {
             permutationReportDtoReceveur.setMatricule(receveur.getMatricule());
             permutationReportDtoDemandeur.setSpecialite(demandeur.getSpeciality() != null ? demandeur.getSpeciality().getLabel() : "");
             permutationReportDtoReceveur.setSpecialite(receveur.getSpeciality() != null ? receveur.getSpeciality().getLabel() : "");
+            permutationReportDtoDemandeur.setCorpsGrade(corpsEtGrade(demandeur));
+            permutationReportDtoReceveur.setCorpsGrade(corpsEtGrade(receveur));
             // On lit l'origine / la destination / l'académie depuis les champs figés de la
             // permutation (capturés à la création) et NON depuis le compte utilisateur en direct :
             // à la validation de l'OS signé, les établissements/IA des deux agents sont échangés,
