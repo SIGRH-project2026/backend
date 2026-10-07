@@ -375,13 +375,14 @@ public class ParametrageController {
     public Response<Object> listPageIEF(@RequestParam(name = "page", defaultValue = "0") int page,
                                        @RequestParam(name = "size", defaultValue = "10") int size,
                                        @RequestParam(name = "filter", defaultValue = "") String filter,
-                                        @RequestParam(name = "statut", defaultValue = "")  Boolean  statut
+                                        @RequestParam(name = "statut", defaultValue = "")  Boolean  statut,
+                                        @RequestParam(name = "ia", defaultValue = "") String ia
 
     )
     {
 
 
-        return parametrageService.getPageIEF(page, size, filter, statut);
+        return parametrageService.getPageIEF(page, size, filter, statut, ia);
     }
 
 
