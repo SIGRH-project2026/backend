@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -99,7 +100,7 @@ public class UtilisateurController {
 
     @Operation(summary = "Endpoint pour ajouter un utilisateur de niveau déconnecté")
     @PostMapping("/deconected/add")
-    // @PreAuthorize("hasRole('ADMIN-DRH')")
+    @PreAuthorize("hasAnyAuthority('ADMIN-DRH','Admin-General','Directeur-DRH','Representant-IA')")
     public ResponseEntity<MFPAIResponse> saveUtilisateurDec(@Valid @RequestBody DeconcentratedLevelDTO dto) {
         DeconcentratedLevel user = iUtilisateur.saveUtilisateurDL(dto);
         MFPAIResponse response = MFPAIResponse.success(deconcentratedLevelMapper.toDto(user));
@@ -108,7 +109,7 @@ public class UtilisateurController {
 
     @Operation(summary = "Endpoint pour importer en masse des utilisateurs de niveau déconcentré (Excel/CSV)")
     @PostMapping(value = "/deconected/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    // @PreAuthorize("hasRole('ADMIN-DRH')")
+    @PreAuthorize("hasAnyAuthority('ADMIN-DRH','Admin-General','Directeur-DRH','Representant-IA')")
     public ResponseEntity<MFPAIResponse> importUtilisateursDec(@RequestParam("file") MultipartFile file) {
         UserImportResultDTO result = iUtilisateur.importUtilisateursDL(file);
         MFPAIResponse response = MFPAIResponse.success(result)
@@ -137,7 +138,7 @@ public class UtilisateurController {
 
     @Operation(summary = "Endpoint pour mettre à jour  un utilisateur de niveau déconnecté")
     @PutMapping("/deconected/update/{id}")
-    // @PreAuthorize("hasRole('ADMIN-DRH')")
+    @PreAuthorize("hasAnyAuthority('ADMIN-DRH','Admin-General','Directeur-DRH','Representant-IA')")
     public ResponseEntity<MFPAIResponse> saveUtilisateurDec(@PathVariable(value = "id") Long id,
             @Valid @RequestBody DeconcentratedLevelDTO dto) {
         DeconcentratedLevel user = iUtilisateur.updateUtilisateurDL(id, dto);

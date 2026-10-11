@@ -59,6 +59,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -410,6 +411,11 @@ public class UtilisateurImpl implements IUtilisateur {
 
             deconcentratedLevel.setProfils(profiles);
 
+            IA iaRepresentant = iaDuRepresentantConnecte();
+            if (iaRepresentant != null) {
+                controlerPerimetreIA(deconcentratedLevel, iaRepresentant);
+            }
+
             DeconcentratedLevel deconcentratedLevelSave = utilisateurRepository.save(deconcentratedLevel);
 
             if (Objects.nonNull(deconcentratedLevelSave)) {
@@ -423,8 +429,129 @@ public class UtilisateurImpl implements IUtilisateur {
         }
     }
 
+    // ==========================================================================
+    // Périmètre du Representant-IA : il ne gère que le personnel de son IA
+    // (représentants IEF et personnel des établissements de ses IEF).
+    // ==========================================================================
 
+    private static final String PROFIL_REPRESENTANT_IA = "Representant-IA";
 
+    /**
+     * IA à laquelle l'utilisateur connecté est limité pour la gestion des comptes,
+     * ou {@code null} pour les profils de niveau national (ADMIN-DRH, Directeur-DRH...).
+     */
+    private IA iaDuRepresentantConnecte() {
+        Utilisateur connecte = getCurrentUser();
+        if (connecte == null || connecte.getProfils() == null || connecte.getProfils().stream()
+                .noneMatch(profile -> PROFIL_REPRESENTANT_IA.equals(profile.getCode()))) {
+            return null;
+        }
+        if (!(connecte instanceof DeconcentratedLevel representant) || representant.getIa() == null) {
+            throw horsPerimetre("Aucune IA n'est rattachée à votre compte.");
+        }
+        return representant.getIa();
+    }
+
+    private static MFPAIException horsPerimetre(String message) {
+        return new MFPAIException(MFPAIMessage.FORBIDDEN.getCode(), message, HttpStatus.FORBIDDEN);
+    }
+
+    private static boolean memeIA(IA ia, IA autre) {
+        return ia != null && autre != null && Objects.equals(ia.getId(), autre.getId());
+    }
+
+    private static boolean etablissementDansIA(Etablissement etablissement, IA ia) {
+        return memeIA(etablissement.getIa(), ia)
+                || (etablissement.getIef() != null && memeIA(etablissement.getIef().getIa(), ia));
+    }
+
+    /**
+     * Vérifie qu'un agent créé ou modifié par un Representant-IA reste dans son IA :
+     * IEF et établissement rattachés à cette IA, profil de niveau déconcentré autre
+     * que Representant-IA. La région est alignée sur celle de l'IA.
+     */
+    private static void controlerPerimetreIA(DeconcentratedLevel agent, IA iaRepresentant) {
+        if (!memeIA(agent.getIa(), iaRepresentant)) {
+            throw horsPerimetre("Vous ne pouvez gérer que le personnel de l'IA "
+                    + iaRepresentant.getLabel() + ".");
+        }
+        IEF ief = agent.getIef();
+        if (ief != null && !memeIA(ief.getIa(), iaRepresentant)) {
+            throw horsPerimetre("L'IEF " + ief.getLabel() + " ne dépend pas de votre IA.");
+        }
+        Etablissement etablissement = agent.getEtablissement();
+        if (etablissement != null) {
+            if (!etablissementDansIA(etablissement, iaRepresentant)) {
+                throw horsPerimetre("L'établissement " + etablissement.getLabel() + " ne dépend pas de votre IA.");
+            }
+            if (ief != null && etablissement.getIef() != null
+                    && !Objects.equals(etablissement.getIef().getId(), ief.getId())) {
+                throw horsPerimetre("L'établissement " + etablissement.getLabel()
+                        + " ne dépend pas de l'IEF " + ief.getLabel() + ".");
+            }
+        }
+        if (agent.getProfils() != null) {
+            for (Profile profile : agent.getProfils()) {
+                if (!DEC.equalsIgnoreCase(profile.getTypeProfile())
+                        || PROFIL_REPRESENTANT_IA.equals(profile.getCode())) {
+                    throw horsPerimetre("Vous n'êtes pas autorisé à attribuer le profil "
+                            + profile.getLabel() + ".");
+                }
+            }
+        }
+        if (iaRepresentant.getRegion() != null) {
+            agent.setRegion(iaRepresentant.getRegion());
+        }
+    }
+
+    /** IEF et établissements de l'IA d'un Representant-IA, indexés par code et libellé normalisés. */
+    private record PerimetreImportIA(IA ia, Map<String, IEF> iefs, Map<String, Etablissement> etablissements) {
+
+        IEF ief(String valeur) {
+            IEF ief = iefs.get(normalizeHeader(valeur));
+            if (ief == null) {
+                throw horsPerimetre("L'IEF « " + valeur + " » n'existe pas dans votre IA.");
+            }
+            return ief;
+        }
+
+        Etablissement etablissement(String valeur) {
+            Etablissement etablissement = etablissements.get(normalizeHeader(valeur));
+            if (etablissement == null) {
+                throw horsPerimetre("L'établissement « " + valeur + " » n'existe pas dans votre IA.");
+            }
+            return etablissement;
+        }
+
+        void verifierIA(String valeur) {
+            String cle = normalizeHeader(valeur);
+            if (!cle.equals(normalizeHeader(ia.getCode())) && !cle.equals(normalizeHeader(ia.getLabel()))) {
+                throw horsPerimetre("L'IA « " + valeur + " » n'est pas la vôtre (" + ia.getLabel() + ").");
+            }
+        }
+    }
+
+    private PerimetreImportIA chargerPerimetreImport(IA ia) {
+        Map<String, IEF> iefs = new HashMap<>();
+        Map<String, Etablissement> etablissements = new HashMap<>();
+        for (IEF ief : iefRepository.findByIa_Code(ia.getCode())) {
+            indexer(iefs, ief.getCode(), ief.getLabel(), ief);
+            etablissementRepository.findByIef_Code(ief.getCode())
+                    .forEach(e -> indexer(etablissements, e.getCode(), e.getLabel(), e));
+        }
+        etablissementRepository.findByIa_Code(ia.getCode())
+                .forEach(e -> indexer(etablissements, e.getCode(), e.getLabel(), e));
+        return new PerimetreImportIA(ia, iefs, etablissements);
+    }
+
+    private static <T> void indexer(Map<String, T> index, String code, String label, T valeur) {
+        if (!isBlank(code)) {
+            index.putIfAbsent(normalizeHeader(code), valeur);
+        }
+        if (!isBlank(label)) {
+            index.putIfAbsent(normalizeHeader(label), valeur);
+        }
+    }
 
     /** Champs obligatoires lors du chargement en masse (niveau déconcentré). */
     private static final List<String[]> IMPORT_REQUIRED_FIELDS = List.of(
@@ -477,6 +604,11 @@ public class UtilisateurImpl implements IUtilisateur {
         // requêtée qu'une seule fois pour tout l'import, quel que soit le nombre
         // de lignes qui la partagent (très fréquent : IA, IEF, établissement...).
         ImportReferenceCaches caches = new ImportReferenceCaches();
+
+        // Un Representant-IA n'importe que dans son IA, sur des IEF et établissements
+        // existants : aucun référentiel n'est créé ni rattaché à une autre IA.
+        IA iaRepresentant = iaDuRepresentantConnecte();
+        PerimetreImportIA perimetre = iaRepresentant == null ? null : chargerPerimetreImport(iaRepresentant);
 
         List<PendingImportRow> batch = new ArrayList<>(IMPORT_BATCH_SIZE);
 
@@ -600,11 +732,20 @@ public class UtilisateurImpl implements IUtilisateur {
 
                 // Les référentiels absents sont alimentés par l'import. Ils ne doivent
                 // pas empêcher le chargement d'un agent valide.
-                IA ia = resolveOrCreateIA(caches, iaValue);
-                IEF ief = resolveOrCreateIEF(caches, iefValue, ia);
+                IA ia;
+                IEF ief;
+                Etablissement etablissement;
+                if (perimetre == null) {
+                    ia = resolveOrCreateIA(caches, iaValue);
+                    ief = resolveOrCreateIEF(caches, iefValue, ia);
+                    etablissement = resolveOrCreateEtablissement(caches, etablissementValue, ia, ief);
+                } else {
+                    perimetre.verifierIA(iaValue);
+                    ia = perimetre.ia();
+                    ief = perimetre.ief(iefValue);
+                    etablissement = perimetre.etablissement(etablissementValue);
+                }
                 TypeSystemeEnseignement typeSysteme = resolveOrCreateTypeSysteme(caches, typeSystemeValue);
-                Etablissement etablissement = resolveOrCreateEtablissement(caches,
-                        etablissementValue, ia, ief);
 
                 user.setIa(ia);
                 user.setIef(ief);
@@ -628,6 +769,10 @@ public class UtilisateurImpl implements IUtilisateur {
                         }
                     }
                     user.setProfils(profiles);
+                }
+
+                if (perimetre != null) {
+                    controlerPerimetreIA(user, perimetre.ia());
                 }
 
                 if (!isBlank(user.getMatriculeFonctionnaire())) {
@@ -1530,6 +1675,11 @@ public class UtilisateurImpl implements IUtilisateur {
 
         DeconcentratedLevel deconcentratedLevelDB = deconcentratedLevelRepository.findById(id).orElseThrow();
 
+        IA iaRepresentant = iaDuRepresentantConnecte();
+        if (iaRepresentant != null && !memeIA(deconcentratedLevelDB.getIa(), iaRepresentant)) {
+            throw horsPerimetre("Cet agent ne relève pas de votre IA.");
+        }
+
         if (dto.getTypeMatricule().getCode().equals("MATFONC")) {
             if (!Objects.nonNull(dto.getDateDEntreeFonctionPub())) {
                 throw new MFPAIException(MATRICULE_OBLIGATOIRE_FONCTIONAIRE,
@@ -1724,6 +1874,10 @@ public class UtilisateurImpl implements IUtilisateur {
 
         deconcentratedLevelDB.setProfils(profiles);
 
+        if (iaRepresentant != null) {
+            controlerPerimetreIA(deconcentratedLevelDB, iaRepresentant);
+        }
+
         if (Objects.equals(dto.getEmail(), deconcentratedLevelDB.getEmail())) {
             deconcentratedLevelDB.setEmail(dto.getEmail());
             // Le compte est déjà activé (l'agent a déjà effectué sa première
@@ -1872,6 +2026,18 @@ public class UtilisateurImpl implements IUtilisateur {
     public Utilisateur changeStatut(Long id) {
         Utilisateur utilisateur = utilisateurRepository.findById(id)
                 .orElseThrow(() -> new MFPAIException(MFPAIMessage.USER_NOT_FOUND));
+
+        IA iaRepresentant = iaDuRepresentantConnecte();
+        if (iaRepresentant != null) {
+            if (!(utilisateur instanceof DeconcentratedLevel agent) || !memeIA(agent.getIa(), iaRepresentant)) {
+                throw horsPerimetre("Cet agent ne relève pas de votre IA.");
+            }
+            if (utilisateur.getProfils() != null && utilisateur.getProfils().stream()
+                    .anyMatch(profile -> PROFIL_REPRESENTANT_IA.equals(profile.getCode()))) {
+                throw horsPerimetre("Vous ne pouvez pas modifier le statut d'un représentant d'IA.");
+            }
+        }
+
         utilisateur.setStatus(!utilisateur.getStatus());
 
         Utilisateur utilisateurSaving = utilisateurRepository.save(utilisateur);
