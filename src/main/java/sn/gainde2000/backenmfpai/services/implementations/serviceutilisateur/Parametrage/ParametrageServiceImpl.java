@@ -680,7 +680,7 @@ public class ParametrageServiceImpl implements ParametrageService {
     }
 
     @Override
-    public Response<Object> getPageIEF(int page, int size, String filter, Boolean  statut) {
+    public Response<Object> getPageIEF(int page, int size, String filter, Boolean  statut, String ia) {
         Page<IEFDTO> iefdtoPage;
         BooleanBuilder builder = new BooleanBuilder();
 
@@ -708,6 +708,12 @@ public class ParametrageServiceImpl implements ParametrageService {
         if (Objects.nonNull(statut)) {
             builder.and(
                     QIEF.iEF.statut.eq(statut)
+            );
+        }
+
+        if (StringUtils.isNotBlank(ia)) {
+            builder.and(
+                    QIEF.iEF.ia.code.eq(ia)
             );
         }
 
