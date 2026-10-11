@@ -100,7 +100,7 @@ public class UtilisateurController {
 
     @Operation(summary = "Endpoint pour ajouter un utilisateur de niveau déconnecté")
     @PostMapping("/deconected/add")
-    @PreAuthorize("hasAnyAuthority('ADMIN-DRH','Admin-General','Directeur-DRH','Representant-IA')")
+    @PreAuthorize("hasAnyAuthority('ADMIN-DRH','Admin-General','Directeur-DRH','Representant-IA','Représentant-IEF')")
     public ResponseEntity<MFPAIResponse> saveUtilisateurDec(@Valid @RequestBody DeconcentratedLevelDTO dto) {
         DeconcentratedLevel user = iUtilisateur.saveUtilisateurDL(dto);
         MFPAIResponse response = MFPAIResponse.success(deconcentratedLevelMapper.toDto(user));
@@ -109,7 +109,7 @@ public class UtilisateurController {
 
     @Operation(summary = "Endpoint pour importer en masse des utilisateurs de niveau déconcentré (Excel/CSV)")
     @PostMapping(value = "/deconected/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyAuthority('ADMIN-DRH','Admin-General','Directeur-DRH','Representant-IA')")
+    @PreAuthorize("hasAnyAuthority('ADMIN-DRH','Admin-General','Directeur-DRH','Representant-IA','Représentant-IEF')")
     public ResponseEntity<MFPAIResponse> importUtilisateursDec(@RequestParam("file") MultipartFile file) {
         UserImportResultDTO result = iUtilisateur.importUtilisateursDL(file);
         MFPAIResponse response = MFPAIResponse.success(result)
@@ -138,7 +138,7 @@ public class UtilisateurController {
 
     @Operation(summary = "Endpoint pour mettre à jour  un utilisateur de niveau déconnecté")
     @PutMapping("/deconected/update/{id}")
-    @PreAuthorize("hasAnyAuthority('ADMIN-DRH','Admin-General','Directeur-DRH','Representant-IA')")
+    @PreAuthorize("hasAnyAuthority('ADMIN-DRH','Admin-General','Directeur-DRH','Representant-IA','Représentant-IEF')")
     public ResponseEntity<MFPAIResponse> saveUtilisateurDec(@PathVariable(value = "id") Long id,
             @Valid @RequestBody DeconcentratedLevelDTO dto) {
         DeconcentratedLevel user = iUtilisateur.updateUtilisateurDL(id, dto);

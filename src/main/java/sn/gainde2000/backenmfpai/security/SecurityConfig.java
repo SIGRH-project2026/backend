@@ -33,9 +33,9 @@ public class SecurityConfig {
     private final JwtAuthEntryPoint jwtAuthEntryPoint;
     private final AllowedOrigins allowedOrigins;
     private static final String[] ADMINS = {"Admin-General", "ADMIN-DRH"};
-    // Gestion du personnel déconcentré : le Representant-IA y a accès, limité à
-    // son IA par UtilisateurImpl (contrôle de périmètre).
-    private static final String[] GESTION_DECONCENTRE = {"Admin-General", "ADMIN-DRH", "Directeur-DRH", "Representant-IA"};
+    // Gestion du personnel déconcentré : les représentants IA et IEF y ont accès, limités à
+    // leur circonscription par UtilisateurImpl (contrôle de périmètre).
+    private static final String[] GESTION_DECONCENTRE = {"Admin-General", "ADMIN-DRH", "Directeur-DRH", "Representant-IA", "Représentant-IEF"};
 
     @Bean
     public SecurityFilterChain securiConfigFiltre(HttpSecurity http) throws Exception {
