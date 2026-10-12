@@ -431,12 +431,15 @@ public class ParametrageController {
     public Response<Object> listPageEtablissement(@RequestParam(name = "page", defaultValue = "0") int page,
                                         @RequestParam(name = "size", defaultValue = "10") int size,
                                         @RequestParam(name = "filter", defaultValue = "") String filter,
-                                      @RequestParam(name = "statut", defaultValue = "")  Boolean  statut
+                                      @RequestParam(name = "statut", defaultValue = "")  Boolean  statut,
+                                      @RequestParam(name = "region", defaultValue = "") String region,
+                                      @RequestParam(name = "ia", defaultValue = "") String ia,
+                                      @RequestParam(name = "ief", defaultValue = "") String ief
 
     )
     {
 
-        return parametrageService.getPageEtablissement(page, size, filter, statut);
+        return parametrageService.getPageEtablissement(page, size, filter, statut, region, ia, ief);
     }
 
 
