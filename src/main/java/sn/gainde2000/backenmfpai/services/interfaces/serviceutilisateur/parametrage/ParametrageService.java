@@ -76,7 +76,7 @@ public interface ParametrageService {
     Etablissement updateEtablissement(Long id, EtablissementDTO dto);
     Etablissement getEtablissement(Long id);
     Etablissement activateEtablissement(Long id);
-    Response<Object> getPageEtablissement(int page, int size, String filter, Boolean  statut);
+    Response<Object> getPageEtablissement(int page, int size, String filter, Boolean  statut, String region, String ia, String ief);
 
 
     // Speciality
