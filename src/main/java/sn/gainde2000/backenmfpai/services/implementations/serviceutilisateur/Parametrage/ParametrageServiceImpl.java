@@ -1,6 +1,7 @@
 package sn.gainde2000.backenmfpai.services.implementations.serviceutilisateur.Parametrage;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPAExpressions;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -885,7 +886,7 @@ public class ParametrageServiceImpl implements ParametrageService {
     }
 
     @Override
-    public Response<Object> getPageEtablissement(int page, int size, String filter,  Boolean  statut) {
+    public Response<Object> getPageEtablissement(int page, int size, String filter,  Boolean  statut, String region, String ia, String ief) {
         Page<EtablissementDTO> etablissementDTOPage;
         BooleanBuilder builder = new BooleanBuilder();
 
@@ -914,6 +915,24 @@ public class ParametrageServiceImpl implements ParametrageService {
             );
         }
 
+        if (StringUtils.isNotBlank(region)) {
+            builder.and(
+                    QEtablissement.etablissement.ia.region.code.eq(region)
+            );
+        }
+
+        if (StringUtils.isNotBlank(ia)) {
+            builder.and(
+                    QEtablissement.etablissement.ia.code.eq(ia)
+            );
+        }
+
+        if (StringUtils.isNotBlank(ief)) {
+            builder.and(
+                    QEtablissement.etablissement.ief.code.eq(ief)
+            );
+        }
+
 
 
         if (StringUtils.isNotBlank(filter)) {
@@ -921,8 +940,15 @@ public class ParametrageServiceImpl implements ParametrageService {
             builder.andAnyOf(
                     QEtablissement.etablissement.code.containsIgnoreCase(filter),
                     QEtablissement.etablissement.label.containsIgnoreCase(filter),
-                    QEtablissement.etablissement.ia.label.containsIgnoreCase(filter),
-                    QEtablissement.etablissement.ief.label.containsIgnoreCase(filter)
+                    QEtablissement.etablissement.ia.id.in(
+                            JPAExpressions.select(QIA.iA.id).from(QIA.iA)
+                                    .where(QIA.iA.label.containsIgnoreCase(filter)
+                                            .or(QIA.iA.region.label.containsIgnoreCase(filter)))
+                    ),
+                    QEtablissement.etablissement.ief.id.in(
+                            JPAExpressions.select(QIEF.iEF.id).from(QIEF.iEF)
+                                    .where(QIEF.iEF.label.containsIgnoreCase(filter))
+                    )
             );
         }
 
