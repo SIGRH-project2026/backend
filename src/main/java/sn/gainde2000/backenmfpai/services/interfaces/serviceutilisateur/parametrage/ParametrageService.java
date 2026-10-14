@@ -68,7 +68,7 @@ public interface ParametrageService {
     IEF updateIEF(Long id, IEFDTO dto);
     IEF getIEF(Long id);
     IEF activateIEF(Long id);
-    Response<Object> getPageIEF(int page, int size, String filter,  Boolean  statut);
+    Response<Object> getPageIEF(int page, int size, String filter,  Boolean  statut, String ia);
 
 
     // Etablissement

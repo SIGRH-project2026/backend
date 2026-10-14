@@ -385,14 +385,8 @@ public class PermutationServiceImpl implements IPermutationService {
                     permutation.setTraitementPermutation(traitementPermutationSaved);
                     permutation.setNiveau(1);
                     Permutation permutationSaved = iPermutationRepository.save(permutation);
-                    String profilTraitant = "";
-                    if (currentUser.getProfils().stream().findAny().get().getCode().equals("Professeur"))
-                        profilTraitant = "Chef-etablissement";
-                    else if(currentUser.getProfils().stream().findAny().get().getCode().equals("Formateurs-CFP"))
-                        profilTraitant = "Chef-cfp";
-                    else
-                        profilTraitant = "Chef-EFF";
-                    sendPlateformeNotification(permutation,profilTraitant,"DEC");
+                    // les chefs des deux établissements (lycée, CFP ou EFF) sont notifiés
+                    sendPlateformeNotification(permutation, "Chef-etablissement", "DEC");
                     return permutationMapper.toDto(permutationSaved);
                 } else if (action.equals("REJETER")) {
                     System.out.println("\n ##### refuser \n");
@@ -487,6 +481,8 @@ public class PermutationServiceImpl implements IPermutationService {
                             permutation.setNiveau(4);
                             //iPermutationRepository.save(permutation);
                         sendPlateformeNotification(permutation, profilTraitant, "CEN");
+                        // l'assistant DRH peut aussi accuser réception (« Reçu DRH »)
+                        sendPlateformeNotification(permutation, "Assistant-DRH", "CEN");
                         }
                     Permutation permutationSaved = iPermutationRepository.save(permutation);
                     return permutationMapper.toDto(permutationSaved);
@@ -619,6 +615,8 @@ public class PermutationServiceImpl implements IPermutationService {
                             permutation.getId(),"reçue et transmise à la DGPEEC pour traitement"
                     );
                     sendPlateformeNotification(permutation, "Chef-division-dgpeec", "CEN");
+                    // le bureau-mo-rec traite aussi les permutations à la DGPEEC
+                    sendPlateformeNotification(permutation, "bureau-mo-rec", "CEN");
                     return permutationResponseDto;
                 }
             }else{
@@ -694,6 +692,17 @@ public class PermutationServiceImpl implements IPermutationService {
                     return Response.exception().setMessage("Veuillez d'abord télécharger l'ordre de service à signer");
                 }
                 Object result = fileImpl.uploadPermutationOs(file,permutation,utilisateur);
+
+                // fin du circuit : les deux agents sont informés de la validation (OS signé disponible)
+                Permutation permutationValidee = iPermutationRepository.findById(idPermutation).orElse(permutation);
+                if (permutationValidee.getTraitementPermutation() != null
+                        && "VALIDER".equals(permutationValidee.getTraitementPermutation().getStatut().getCode())) {
+                    String message = "Votre demande de permutation n° " + idPermutation
+                            + " est validée. L'ordre de service signé est disponible au téléchargement.";
+                    businessNotifications.notify(permutationValidee.getUtilisateur1(), "Permutation validée", message);
+                    if (!Objects.equals(permutationValidee.getUtilisateur1().getId(), permutationValidee.getUtilisateur2().getId()))
+                        businessNotifications.notify(permutationValidee.getUtilisateur2(), "Permutation validée", message);
+                }
 
                 return Response.ok().setPayload(result);
             }
@@ -818,6 +827,8 @@ public class PermutationServiceImpl implements IPermutationService {
         List<CentralLevel>  centralLevels = new ArrayList<>();
 
         if(userType.equals("CEN")){
+            if (profile == null)
+                return;
             centralLevels = centralLevelRepository.findCentralLevelByProfilsContains(profile);
         }else {
 
@@ -825,8 +836,16 @@ public class PermutationServiceImpl implements IPermutationService {
                 case "Chef-etablissement":
                 case "Chef-EFF":
                 case "Chef-cfp":{
-                    deconcentratedLevel = deconcentratedLevelRepository.findDeconcentratedLevelByEtablissementAndProfilsContains(permutation.getEtablissementDemandeur(), profile);
-                    deconcentratedLevel.addAll(deconcentratedLevelRepository.findDeconcentratedLevelByEtablissementAndProfilsContains(permutation.getEtablissementReceveur(), profile));
+                    // chaque établissement a son propre type de chef (lycée, CFP, EFF) : on notifie tous les chefs
+                    // des deux établissements, quel que soit le profil reçu en paramètre
+                    deconcentratedLevel = new ArrayList<>();
+                    for (String codeChef : List.of("Chef-etablissement", "Chef-cfp", "Chef-EFF")) {
+                        Profile profilChef = iProfilRepository.findProfileByCode(codeChef);
+                        if (profilChef == null)
+                            continue;
+                        deconcentratedLevel.addAll(deconcentratedLevelRepository.findDeconcentratedLevelByEtablissementAndProfilsContains(permutation.getEtablissementDemandeur(), profilChef));
+                        deconcentratedLevel.addAll(deconcentratedLevelRepository.findDeconcentratedLevelByEtablissementAndProfilsContains(permutation.getEtablissementReceveur(), profilChef));
+                    }
                     break;
                 }
 
@@ -859,6 +878,10 @@ public class PermutationServiceImpl implements IPermutationService {
             }
 
         }
+        // un même acteur peut remonter deux fois (ex. même IEF / IA pour les deux agents) : une seule notification
+        Set<Long> dejaNotifies = new HashSet<>();
+        deconcentratedLevel.removeIf(acteur -> !dejaNotifies.add(acteur.getId()));
+        centralLevels.removeIf(acteur -> !dejaNotifies.add(acteur.getId()));
         if(!deconcentratedLevel.isEmpty()){
         for (DeconcentratedLevel deconcentratedLevel1 : deconcentratedLevel){
             System.out.println("#### Avant save notif deconcentre"+ deconcentratedLevel1.getNom());

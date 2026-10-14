@@ -3,7 +3,10 @@ package sn.gainde2000.backenmfpai.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,6 +21,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import sn.gainde2000.backenmfpai.security.jwt.JwtAuthEntryPoint;
 import sn.gainde2000.backenmfpai.security.jwt.JwtAuthTokenFilter;
 import java.util.List;
+import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
@@ -29,6 +33,9 @@ public class SecurityConfig {
     private final JwtAuthEntryPoint jwtAuthEntryPoint;
     private final AllowedOrigins allowedOrigins;
     private static final String[] ADMINS = {"Admin-General", "ADMIN-DRH"};
+    // Gestion du personnel déconcentré : les représentants IA et IEF y ont accès, limités à
+    // leur circonscription par UtilisateurImpl (contrôle de périmètre).
+    private static final String[] GESTION_DECONCENTRE = {"Admin-General", "ADMIN-DRH", "Directeur-DRH", "Representant-IA", "Représentant-IEF"};
 
     @Bean
     public SecurityFilterChain securiConfigFiltre(HttpSecurity http) throws Exception {
@@ -53,13 +60,30 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**",
                                 "/menus/create", "/profiles/**", "/profils/**",
                                 "/utilisateur/switch-user/**").hasAnyAuthority(ADMINS)
+                        .requestMatchers(HttpMethod.POST, "/utilisateur/deconected/add",
+                                "/utilisateur/deconected/import").hasAnyAuthority(GESTION_DECONCENTRE)
+                        .requestMatchers(HttpMethod.PUT, "/utilisateur/deconected/update/**",
+                                "/utilisateur/change-status/**").hasAnyAuthority(GESTION_DECONCENTRE)
                         .requestMatchers(HttpMethod.POST, "/utilisateur/**", "/notifications/add").hasAnyAuthority(ADMINS)
                         .requestMatchers(HttpMethod.PUT, "/utilisateur/**").hasAnyAuthority(ADMINS)
                         .requestMatchers(HttpMethod.PATCH, "/utilisateur/**").hasAnyAuthority(ADMINS)
                         .requestMatchers(HttpMethod.DELETE, "/utilisateur/**").hasAnyAuthority(ADMINS)
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthEntryPoint))
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(jwtAuthEntryPoint)
+                        // Un refus de droits ne doit pas être confondu avec une session
+                        // expirée : sans ce handler, Spring redirige vers /error, répond 401
+                        // et le front tente un refresh qui échoue (« token invalide »).
+                        .accessDeniedHandler((request, response, denied) -> {
+                            response.setStatus(HttpStatus.FORBIDDEN.value());
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            response.setCharacterEncoding("UTF-8");
+                            new ObjectMapper().writeValue(response.getOutputStream(), Map.of(
+                                    "success", false,
+                                    "status", "403000",
+                                    "message", "Vous n'êtes pas autorisé à effectuer cette action."));
+                        }))
                 .addFilterBefore(jwtAuthTokenFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
