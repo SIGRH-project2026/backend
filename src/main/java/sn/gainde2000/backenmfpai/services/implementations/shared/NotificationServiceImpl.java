@@ -1,14 +1,12 @@
 package sn.gainde2000.backenmfpai.services.implementations.shared;
 
-import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
-
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import jakarta.transaction.Transactional;
+import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
 import sn.gainde2000.backenmfpai.commons.utils.mail.MailService;
 import sn.gainde2000.backenmfpai.entities.serviceutilisateur.Utilisateur;
 import sn.gainde2000.backenmfpai.security.jwt.JwtProvider;
@@ -23,7 +21,6 @@ import sn.gainde2000.backenmfpai.web.dtos.responses.mails.MailInfosDTO;
 
 @Service
 @Transactional
-@RequiredArgsConstructor
 public class NotificationServiceImpl implements INotificationService {
     @Override
     public void sendNotificationDossierCreated(String email) {
@@ -64,6 +61,13 @@ public class NotificationServiceImpl implements INotificationService {
     private final MailService mailService;
     private final BusinessNotificationService businessNotifications;
     private static final String SUIVI_PERMUTATION = "Suivi demande de permutation";
+
+    public NotificationServiceImpl(JwtProvider jwtProvider, MailService mailService,
+                                   BusinessNotificationService businessNotifications) {
+        this.jwtProvider = jwtProvider;
+        this.mailService = mailService;
+        this.businessNotifications = businessNotifications;
+    }
 
     @Value("${app.url.front}")
     private String appUrlFront;
