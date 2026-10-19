@@ -2064,8 +2064,6 @@ public class UtilisateurImpl implements IUtilisateur {
         utilisateur.setFonction(null);
 
         UserManager userManager = utilisateurRepository.saveAndFlush(utilisateur);
-        notificationService.sendNotificationToNewUserRegistredByAdmin(
-                new LoginFormDTO(utilisateur.getEmail(), password), FIRST_CONNEXION);
 
         if (isRegister) {
             notificationService.sendNotificationToNewUserRegistred(new LoginFormDTO(utilisateur.getEmail(), password),

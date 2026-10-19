@@ -1,14 +1,12 @@
 package sn.gainde2000.backenmfpai.services.implementations.shared;
 
-import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
-
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import jakarta.transaction.Transactional;
+import sn.gainde2000.backenmfpai.commons.Notification.BusinessNotificationService;
 import sn.gainde2000.backenmfpai.commons.utils.mail.MailService;
 import sn.gainde2000.backenmfpai.entities.serviceutilisateur.Utilisateur;
 import sn.gainde2000.backenmfpai.security.jwt.JwtProvider;
@@ -23,7 +21,6 @@ import sn.gainde2000.backenmfpai.web.dtos.responses.mails.MailInfosDTO;
 
 @Service
 @Transactional
-@RequiredArgsConstructor
 public class NotificationServiceImpl implements INotificationService {
     @Override
     public void sendNotificationDossierCreated(String email) {
@@ -34,6 +31,10 @@ public class NotificationServiceImpl implements INotificationService {
                 "Votre dossier agent a été créé. Vous pouvez le consulter dans votre espace personnel sur la plateforme SIGRH.",
                 "Création de votre dossier agent", null, email);
         // Ne pas envoyer de confirmation si la création du dossier est annulée.
+        sendEmailAfterCommit(mail);
+    }
+
+    private void sendEmailAfterCommit(MailInfosDTO mail) {
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
@@ -60,6 +61,13 @@ public class NotificationServiceImpl implements INotificationService {
     private final MailService mailService;
     private final BusinessNotificationService businessNotifications;
     private static final String SUIVI_PERMUTATION = "Suivi demande de permutation";
+
+    public NotificationServiceImpl(JwtProvider jwtProvider, MailService mailService,
+                                   BusinessNotificationService businessNotifications) {
+        this.jwtProvider = jwtProvider;
+        this.mailService = mailService;
+        this.businessNotifications = businessNotifications;
+    }
 
     @Value("${app.url.front}")
     private String appUrlFront;
@@ -193,11 +201,10 @@ public class NotificationServiceImpl implements INotificationService {
 
     @Override
     public void sendEmail(MailInfosDTO mailInfosDTO) {
-        System.out.println("### send mail fonction");
-        MailInfosDTO mailInfos = new MailInfosDTO(mailInfosDTO.id(), mailInfosDTO.originalText(), mailInfosDTO.subject(), getHtmlMessage(mailInfosDTO.originalText(), urlLogoStarterKit,NOM_ORGANISATION), mailInfosDTO.destinataire());
-
-
-        mailService.sendMail(mailInfos);
+        // Envoi après commit (pas de mail pour un compte dont la création est
+        // annulée) via sendASynchronousMail, qui enregistre les échecs dans
+        // FailedMail au lieu de les perdre silencieusement comme sendMail.
+        sendEmailAfterCommit(mailInfosDTO);
     }
 
     private void sendEmailAsync(MailInfosDTO mailInfosDTO) {
