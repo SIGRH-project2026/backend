@@ -34,6 +34,10 @@ public class NotificationServiceImpl implements INotificationService {
                 "Votre dossier agent a été créé. Vous pouvez le consulter dans votre espace personnel sur la plateforme SIGRH.",
                 "Création de votre dossier agent", null, email);
         // Ne pas envoyer de confirmation si la création du dossier est annulée.
+        sendEmailAfterCommit(mail);
+    }
+
+    private void sendEmailAfterCommit(MailInfosDTO mail) {
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
@@ -193,11 +197,10 @@ public class NotificationServiceImpl implements INotificationService {
 
     @Override
     public void sendEmail(MailInfosDTO mailInfosDTO) {
-        System.out.println("### send mail fonction");
-        MailInfosDTO mailInfos = new MailInfosDTO(mailInfosDTO.id(), mailInfosDTO.originalText(), mailInfosDTO.subject(), getHtmlMessage(mailInfosDTO.originalText(), urlLogoStarterKit,NOM_ORGANISATION), mailInfosDTO.destinataire());
-
-
-        mailService.sendMail(mailInfos);
+        // Envoi après commit (pas de mail pour un compte dont la création est
+        // annulée) via sendASynchronousMail, qui enregistre les échecs dans
+        // FailedMail au lieu de les perdre silencieusement comme sendMail.
+        sendEmailAfterCommit(mailInfosDTO);
     }
 
     private void sendEmailAsync(MailInfosDTO mailInfosDTO) {
