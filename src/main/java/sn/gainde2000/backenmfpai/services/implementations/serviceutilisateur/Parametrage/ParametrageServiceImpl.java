@@ -41,6 +41,7 @@ import sn.gainde2000.backenmfpai.web.dtos.responses.serviceutilisateur.utilisate
 
 
 import java.util.*;
+import java.util.function.Function;
 
 
 import static sn.gainde2000.backenmfpai.entities.serviceutilisateur.QDiplomes.diplomes;
@@ -169,16 +170,9 @@ public class ParametrageServiceImpl implements ParametrageService {
             throw new MFPAIException(MFPAIMessage.CODE_ALREADY_EXISTS, "le code " + dto.getCode() +" existe déjà");
         }
 
+        checkLibelleUnique(dto.getLabel(), directionRepository.findByLibelleNormalise(dto.getLabel()), Direction::getId, null);
 
-
-
-        if(!directionRepository.findAll().isEmpty()) {
-            List<Direction> directions = directionRepository.findAll().stream().toList();
-
-            Direction lastDirection = directions.get(directions.size() - 1);
-
-            direction.setId(lastDirection.getId() + 1);
-        }
+        direction.setId(null); // id attribué par la séquence
 
 
 
@@ -200,6 +194,10 @@ public class ParametrageServiceImpl implements ParametrageService {
             if(!thisDirection.getCode().equals(direction.getCode())){
                 throw new MFPAIException(MFPAIMessage.CODE_ALREADY_EXISTS, "le code " + dto.getCode() +" existe déjà");
             }
+        }
+
+        if (libelleModifie(direction.getLabel(), dto.getLabel())) {
+            checkLibelleUnique(dto.getLabel(), directionRepository.findByLibelleNormalise(dto.getLabel()), Direction::getId, id);
         }
 
         direction.setRegion(region);
@@ -283,13 +281,9 @@ public class ParametrageServiceImpl implements ParametrageService {
             throw new MFPAIException(MFPAIMessage.CODE_ALREADY_EXISTS, "le code " + dto.getCode() +" existe déjà");
         }
 
-        if(!divisionRepository.findAll().isEmpty()) {
-            List<Division> divisions = divisionRepository.findAll().stream().toList();
+        checkLibelleUnique(dto.getLabel(), divisionsMemeLibelle(dto.getLabel(), direction), Division::getId, null);
 
-            Division lastDivision = divisions.get(divisions.size() - 1);
-
-            division.setId(lastDivision.getId() + 1);
-        }
+        division.setId(null); // id attribué par la séquence
 
 
         return divisionRepository.save(division);
@@ -300,6 +294,15 @@ public class ParametrageServiceImpl implements ParametrageService {
         Division division = divisionRepository.findById(id).orElseThrow(() -> new MFPAIException("L'id " + id + " n'existe pas"));
 
         Direction direction = directionRepository.findByCode(dto.getDirection().getCode()).orElse(null);
+
+        Optional<Division> checkExistCode = divisionRepository.findByCode(dto.getCode());
+        if (checkExistCode.isPresent() && !Objects.equals(checkExistCode.get().getId(), id)) {
+            throw new MFPAIException(MFPAIMessage.CODE_ALREADY_EXISTS, "le code " + dto.getCode() + " existe déjà");
+        }
+
+        if (libelleModifie(division.getLabel(), dto.getLabel()) || !memeParent(division.getDirection(), direction, Direction::getId)) {
+            checkLibelleUnique(dto.getLabel(), divisionsMemeLibelle(dto.getLabel(), direction), Division::getId, id);
+        }
 
         division.setDirection(direction);
         division.setStatut(true);
@@ -397,15 +400,9 @@ public class ParametrageServiceImpl implements ParametrageService {
 
         bureau.setStatut(true);
 
-    
+        checkLibelleUnique(dto.getLabel(), bureauxMemeLibelle(dto.getLabel(), bureau.getDivision()), Bureau::getId, null);
 
-        if(!bureauRepository.findAll().isEmpty()) {
-            List<Bureau> bureaus = bureauRepository.findAll().stream().toList();
-
-            Bureau lastBureau = bureaus.get(bureaus.size() - 1);
-
-            bureau.setId(lastBureau.getId() + 1);
-        }
+        bureau.setId(null); // id attribué par la séquence
 
 
         System.out.println("bureau" + bureau);
@@ -420,6 +417,15 @@ public class ParametrageServiceImpl implements ParametrageService {
         Bureau bureau = bureauRepository.findById(id).orElseThrow(() -> new MFPAIException("L'id " + id + " n'existe pas"));
 
         Division division = divisionRepository.findByCode(dto.getDivision().getCode()).orElse(null);
+
+        Optional<Bureau> checkExistCode = bureauRepository.findByCode(dto.getCode());
+        if (checkExistCode.isPresent() && !Objects.equals(checkExistCode.get().getId(), id)) {
+            throw new MFPAIException(MFPAIMessage.CODE_ALREADY_EXISTS, "le code " + dto.getCode() + " existe déjà");
+        }
+
+        if (libelleModifie(bureau.getLabel(), dto.getLabel()) || !memeParent(bureau.getDivision(), division, Division::getId)) {
+            checkLibelleUnique(dto.getLabel(), bureauxMemeLibelle(dto.getLabel(), division), Bureau::getId, id);
+        }
 
         bureau.setDivision(division);
         bureau.setStatut(true);
@@ -489,7 +495,6 @@ public class ParametrageServiceImpl implements ParametrageService {
         IA ia = iaMapper.toEntity(dto);
 
         Optional<IA> checkExistCode = iaRepository.findByCode(dto.getCode());
-        Optional<IA> checkExistLabel = iaRepository.findByLabel(dto.getCode());
 
         Region region = regionRepository.findByCode(dto.getRegion().getCode()).orElse(null);
 
@@ -501,18 +506,9 @@ public class ParametrageServiceImpl implements ParametrageService {
             throw new MFPAIException(MFPAIMessage.CODE_ALREADY_EXISTS, "le code " + dto.getCode() +" existe déjà");
         }
 
-        if (checkExistLabel.isPresent()) {
+        checkLibelleUnique(dto.getLabel(), iaRepository.findByLibelleNormalise(dto.getLabel()), IA::getId, null);
 
-            throw new MFPAIException(MFPAIMessage.CODE_ALREADY_EXISTS, "le libellé " + dto.getCode() +" existe déjà");
-        }
-
-        if(!iaRepository.findAll().isEmpty()) {
-            List<IA> ias = iaRepository.findAll().stream().toList();
-
-            IA lastIA = ias.get(ias.size() - 1);
-
-            ia.setId(lastIA.getId() + 1);
-        }
+        ia.setId(null); // id attribué par la séquence
 
 
         return iaRepository.save(ia);
@@ -523,6 +519,15 @@ public class ParametrageServiceImpl implements ParametrageService {
         IA ia = iaRepository.findById(id).orElseThrow(() -> new MFPAIException("L'id " + id + " n'existe pas"));
 
         Region region = regionRepository.findByCode(dto.getRegion().getCode()).orElse(null);
+
+        Optional<IA> checkExistCode = iaRepository.findByCode(dto.getCode());
+        if (checkExistCode.isPresent() && !Objects.equals(checkExistCode.get().getId(), id)) {
+            throw new MFPAIException(MFPAIMessage.CODE_ALREADY_EXISTS, "le code " + dto.getCode() + " existe déjà");
+        }
+
+        if (libelleModifie(ia.getLabel(), dto.getLabel())) {
+            checkLibelleUnique(dto.getLabel(), iaRepository.findByLibelleNormalise(dto.getLabel()), IA::getId, id);
+        }
 
         ia.setRegion(region);
         ia.setStatut(true);
@@ -618,7 +623,6 @@ public class ParametrageServiceImpl implements ParametrageService {
         IEF ief = iefMapper.toEntity(dto);
 
         Optional<IEF> checkExistCode = iefRepository.findByCode(dto.getCode());
-        Optional<IEF> checkExistLabel = iefRepository.findByLabel(dto.getCode());
 
         IA ia = iaRepository.findByCode(dto.getIa().getCode()).orElse(null);
 
@@ -631,19 +635,9 @@ public class ParametrageServiceImpl implements ParametrageService {
         }
 
 
-        if (checkExistLabel.isPresent()) {
+        checkLibelleUnique(dto.getLabel(), iefRepository.findByLibelleNormalise(dto.getLabel()), IEF::getId, null);
 
-            throw new MFPAIException(MFPAIMessage.CODE_ALREADY_EXISTS, "le code " + dto.getCode() +" existe déjà");
-        }
-
-
-        if(!iefRepository.findAll().isEmpty()) {
-            List<IEF> iefs = iefRepository.findAll().stream().toList();
-
-            IEF lastIEF = iefs.get(iefs.size() - 1);
-
-            ief.setId(lastIEF.getId() + 1);
-        }
+        ief.setId(null); // id attribué par la séquence
 
         return iefRepository.save(ief);
     }
@@ -653,6 +647,15 @@ public class ParametrageServiceImpl implements ParametrageService {
         IEF ief = iefRepository.findById(id).orElseThrow(() -> new MFPAIException("L'id " + id + " n'existe pas"));
 
         IA ia = iaRepository.findByCode(dto.getIa().getCode()).orElse(null);
+
+        Optional<IEF> checkExistCode = iefRepository.findByCode(dto.getCode());
+        if (checkExistCode.isPresent() && !Objects.equals(checkExistCode.get().getId(), id)) {
+            throw new MFPAIException(MFPAIMessage.CODE_ALREADY_EXISTS, "le code " + dto.getCode() + " existe déjà");
+        }
+
+        if (libelleModifie(ief.getLabel(), dto.getLabel())) {
+            checkLibelleUnique(dto.getLabel(), iefRepository.findByLibelleNormalise(dto.getLabel()), IEF::getId, id);
+        }
 
         ief.setIa(ia);
         ief.setStatut(true);
@@ -761,6 +764,8 @@ public class ParametrageServiceImpl implements ParametrageService {
             throw new MFPAIException(MFPAIMessage.CODE_ALREADY_EXISTS, "le code " + dto.getCode() +" existe déjà");
         }
 
+        checkLibelleUnique(dto.getLabel(), etablissementRepository.findByLibelleNormalise(dto.getLabel()), Etablissement::getId, null);
+
         if (!Objects.nonNull(dto.getIa()) || !StringUtils.isNotBlank(dto.getIa().getCode())) {
             throw new MFPAIException("Veuillez sélectionner une IA");
         }
@@ -805,14 +810,7 @@ public class ParametrageServiceImpl implements ParametrageService {
         etablissement.setStatut(true);
 
 
-        if(!etablissementRepository.findAll().isEmpty()) {
-            List<Etablissement> etablissements = etablissementRepository.findAll().stream().toList();
-
-            Etablissement lastEtablissement = etablissements.get(etablissements.size() - 1);
-
-            etablissement.setId(lastEtablissement.getId() + 1);
-        }
-
+        etablissement.setId(null); // id attribué par la séquence
 
         return etablissementRepository.save(etablissement);
     }
@@ -820,6 +818,15 @@ public class ParametrageServiceImpl implements ParametrageService {
     @Override
     public Etablissement updateEtablissement(Long id, EtablissementDTO dto) {
         Etablissement etablissement = etablissementRepository.findById(id).orElseThrow(() -> new MFPAIException("L'id " + id + " n'existe pas"));
+
+        Optional<Etablissement> checkExistCode = etablissementRepository.findByCode(dto.getCode());
+        if (checkExistCode.isPresent() && !Objects.equals(checkExistCode.get().getId(), id)) {
+            throw new MFPAIException(MFPAIMessage.CODE_ALREADY_EXISTS, "le code " + dto.getCode() + " existe déjà");
+        }
+
+        if (libelleModifie(etablissement.getLabel(), dto.getLabel())) {
+            checkLibelleUnique(dto.getLabel(), etablissementRepository.findByLibelleNormalise(dto.getLabel()), Etablissement::getId, id);
+        }
 
         if (!Objects.nonNull(dto.getIa()) || !StringUtils.isNotBlank(dto.getIa().getCode())) {
             throw new MFPAIException("Veuillez sélectionner une IA");
@@ -979,7 +986,6 @@ public class ParametrageServiceImpl implements ParametrageService {
         Speciality speciality = specialityMapper.toEntity(dto);
 
         Optional<Speciality> checkExistCode = specialityRepository.findByCode(dto.getCode());
-        Optional<Speciality> checkLabel = specialityRepository.findByLabel(speciality.getLabel());
 
         speciality.setStatut(true);
 
@@ -988,19 +994,10 @@ public class ParametrageServiceImpl implements ParametrageService {
             throw new MFPAIException(MFPAIMessage.CODE_ALREADY_EXISTS, "le code " + dto.getCode() +" existe déjà");
         }
 
-        if (checkLabel.isPresent()) {
-
-            throw new MFPAIException(MFPAIMessage.CODE_ALREADY_EXISTS, "le libellé " + dto.getCode() +" existe déjà");
-        }
+        checkLibelleUnique(dto.getLabel(), specialityRepository.findByLibelleNormalise(dto.getLabel()), Speciality::getId, null);
 
 
-        if(!specialityRepository.findAll().isEmpty()) {
-            List<Speciality> specialities = specialityRepository.findAll().stream().toList();
-
-            Speciality lastSpeciality = specialities.get(specialities.size() - 1);
-
-            speciality.setId(lastSpeciality.getId() + 1);
-        }
+        speciality.setId(null); // id attribué par la séquence
 
         return specialityRepository.save(speciality);
     }
@@ -1017,6 +1014,10 @@ public class ParametrageServiceImpl implements ParametrageService {
             if(!thisSpeciality.getCode().equals(speciality.getCode())){
                 throw new MFPAIException(MFPAIMessage.CODE_ALREADY_EXISTS, "le code " + dto.getCode() +" existe déjà");
             }
+        }
+
+        if (libelleModifie(speciality.getLabel(), dto.getLabel())) {
+            checkLibelleUnique(dto.getLabel(), specialityRepository.findByLibelleNormalise(dto.getLabel()), Speciality::getId, id);
         }
 
         speciality.setCode(dto.getCode());
@@ -1090,7 +1091,6 @@ public class ParametrageServiceImpl implements ParametrageService {
         Fonction fonction = fonctionMapper.toEntity(dto);
 
         Optional<Fonction> checkExistCode = fonctionRepository.findByCode(dto.getCode());
-        Optional<Fonction> checkExistLabel = fonctionRepository.findByLabel(dto.getCode());
 
 
         fonction.setStatut(true);
@@ -1100,19 +1100,9 @@ public class ParametrageServiceImpl implements ParametrageService {
             throw new MFPAIException(MFPAIMessage.CODE_ALREADY_EXISTS, "le code " + dto.getCode() +" existe déjà");
         }
 
-        if (checkExistLabel.isPresent()) {
+        checkLibelleUnique(dto.getLabel(), fonctionRepository.findByLibelleNormalise(dto.getLabel()), Fonction::getId, null);
 
-            throw new MFPAIException(MFPAIMessage.CODE_ALREADY_EXISTS, "le libellé " + dto.getCode() +" existe déjà");
-        }
-
-
-        if(!fonctionRepository.findAll().isEmpty()) {
-            List<Fonction> fonctionList = fonctionRepository.findAll().stream().toList();
-
-            Fonction lastFonction = fonctionList.get(fonctionList.size() - 1);
-
-            fonction.setId(lastFonction.getId() + 1);
-        }
+        fonction.setId(null); // id attribué par la séquence
 
 
         return fonctionRepository.save(fonction);
@@ -1130,6 +1120,10 @@ public class ParametrageServiceImpl implements ParametrageService {
             if(!thisFonction.getCode().equals(fonction.getCode())){
                 throw new MFPAIException(MFPAIMessage.CODE_ALREADY_EXISTS, "le code " + dto.getCode() +" existe déjà");
             }
+        }
+
+        if (libelleModifie(fonction.getLabel(), dto.getLabel())) {
+            checkLibelleUnique(dto.getLabel(), fonctionRepository.findByLibelleNormalise(dto.getLabel()), Fonction::getId, id);
         }
 
         fonction.setCode(dto.getCode());
@@ -1227,13 +1221,7 @@ public class ParametrageServiceImpl implements ParametrageService {
             specialityEtablissement.setSpeciality(specialityDB);
 
 
-            if(!specialityEtablissementRepository.findAll().isEmpty()) {
-                List<SpecialityEtablissement> specialityEtablissements = specialityEtablissementRepository.findAll().stream().toList();
-
-                SpecialityEtablissement lastSpecialityEtablissement = specialityEtablissements.get(specialityEtablissements.size() - 1);
-
-                specialityEtablissement.setId(lastSpecialityEtablissement.getId() + 1);
-            }
+            specialityEtablissement.setId(null); // id attribué par la séquence
 
 
            specialityEtablissementRepository.save(specialityEtablissement);
@@ -1609,6 +1597,43 @@ public class ParametrageServiceImpl implements ParametrageService {
     private String createSquence(String sequence, String numero) {
         return sequence + "0" + "" + numero;
     }
+
+    /**
+     * Refuse un libellé vide ou déjà porté par un autre enregistrement que idCourant
+     * (null à la création). memeLibelle : enregistrements de même libellé dans le périmètre contrôlé.
+     */
+    private <T> void checkLibelleUnique(String label, List<T> memeLibelle, Function<T, Long> idGetter, Long idCourant) {
+        if (StringUtils.isBlank(label)) {
+            throw new MFPAIException("Veuillez saisir le libellé");
+        }
+        if (memeLibelle.stream().anyMatch(e -> !Objects.equals(idGetter.apply(e), idCourant))) {
+            throw new MFPAIException(MFPAIMessage.CODE_ALREADY_EXISTS, "le libellé " + label.trim() + " existe déjà");
+        }
+    }
+
+    /** En mise à jour, on ne contrôle que si le libellé change : les doublons historiques restent modifiables. */
+    private boolean libelleModifie(String ancien, String nouveau) {
+        return !StringUtils.equalsIgnoreCase(StringUtils.trim(ancien), StringUtils.trim(nouveau));
+    }
+
+    private <P> boolean memeParent(P ancien, P nouveau, Function<P, Long> idGetter) {
+        return Objects.equals(ancien == null ? null : idGetter.apply(ancien), nouveau == null ? null : idGetter.apply(nouveau));
+    }
+
+    /** Une division porte un libellé unique au sein de sa direction. */
+    private List<Division> divisionsMemeLibelle(String label, Direction direction) {
+        return divisionRepository.findByLibelleNormalise(label).stream()
+                .filter(d -> memeParent(d.getDirection(), direction, Direction::getId))
+                .toList();
+    }
+
+    /** Un bureau porte un libellé unique au sein de sa division (un même intitulé peut exister dans plusieurs divisions). */
+    private List<Bureau> bureauxMemeLibelle(String label, Division division) {
+        return bureauRepository.findByLibelleNormalise(label).stream()
+                .filter(b -> memeParent(b.getDivision(), division, Division::getId))
+                .toList();
+    }
+
 
 
 }

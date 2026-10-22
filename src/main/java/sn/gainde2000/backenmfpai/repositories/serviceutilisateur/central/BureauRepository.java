@@ -1,5 +1,7 @@
 package sn.gainde2000.backenmfpai.repositories.serviceutilisateur.central;
 
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import sn.gainde2000.backenmfpai.entities.serviceutilisateur.central.Bureau;
@@ -18,4 +20,8 @@ public interface BureauRepository extends JpaRepository<Bureau, Long>, QuerydslP
     Optional<Bureau> findByCode(String code);
 
     List<Bureau> findByDivision_Code(String code);
+
+    // Libellé comparé sans tenir compte de la casse ni des espaces de début/fin
+    @Query("SELECT e FROM Bureau e WHERE LOWER(TRIM(e.label)) = LOWER(TRIM(:label))")
+    List<Bureau> findByLibelleNormalise(@Param("label") String label);
 }

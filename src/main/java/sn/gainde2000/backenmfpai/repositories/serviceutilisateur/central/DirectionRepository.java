@@ -1,5 +1,7 @@
 package sn.gainde2000.backenmfpai.repositories.serviceutilisateur.central;
 
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import sn.gainde2000.backenmfpai.entities.serviceutilisateur.central.Direction;
@@ -16,4 +18,8 @@ public interface DirectionRepository extends JpaRepository<Direction, Long>, Que
     Optional<Direction> findByCode(String code);
 
     List<Direction> findDirectionByCode(String code);
+
+    // Libellé comparé sans tenir compte de la casse ni des espaces de début/fin
+    @Query("SELECT e FROM Direction e WHERE LOWER(TRIM(e.label)) = LOWER(TRIM(:label))")
+    List<Direction> findByLibelleNormalise(@Param("label") String label);
 }

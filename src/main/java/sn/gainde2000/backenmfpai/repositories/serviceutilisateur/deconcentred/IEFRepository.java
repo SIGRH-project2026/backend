@@ -1,6 +1,7 @@
 
 package sn.gainde2000.backenmfpai.repositories.serviceutilisateur.deconcentred;
 
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -26,4 +27,8 @@ public interface IEFRepository extends JpaRepository<IEF, Long>, QuerydslPredica
 
     @Query("SELECT COUNT(ief) FROM IEF ief")
     long countAllIef();
+
+    // Libellé comparé sans tenir compte de la casse ni des espaces de début/fin
+    @Query("SELECT e FROM IEF e WHERE LOWER(TRIM(e.label)) = LOWER(TRIM(:label))")
+    List<IEF> findByLibelleNormalise(@Param("label") String label);
 }
