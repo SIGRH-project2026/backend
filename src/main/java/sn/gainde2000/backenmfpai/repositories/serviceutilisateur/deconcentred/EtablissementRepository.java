@@ -44,4 +44,8 @@ public interface EtablissementRepository
     long countAllEtablissementIa(String codeIa);
     @Query("SELECT COUNT(etab) FROM Etablissement etab ")
     long countAllEtablissemen();
+
+    // Libellé comparé sans tenir compte de la casse ni des espaces de début/fin
+    @Query("SELECT e FROM Etablissement e WHERE LOWER(TRIM(e.label)) = LOWER(TRIM(:label))")
+    List<Etablissement> findByLibelleNormalise(@Param("label") String label);
 }

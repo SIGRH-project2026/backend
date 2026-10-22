@@ -1,6 +1,7 @@
 
 package sn.gainde2000.backenmfpai.repositories.serviceutilisateur.deconcentred;
 
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -24,4 +25,8 @@ public interface IARepository extends JpaRepository<IA, Long>, QuerydslPredicate
     //indicateurs IA
     @Query("SELECT COUNT(ia) FROM IA ia ")
     long countAllIa();
+
+    // Libellé comparé sans tenir compte de la casse ni des espaces de début/fin
+    @Query("SELECT e FROM IA e WHERE LOWER(TRIM(e.label)) = LOWER(TRIM(:label))")
+    List<IA> findByLibelleNormalise(@Param("label") String label);
 }
